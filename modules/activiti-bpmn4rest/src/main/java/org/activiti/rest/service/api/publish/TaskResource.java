@@ -15,10 +15,12 @@ package org.activiti.rest.service.api.publish;
 
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.impl.DeploymentQueryProperty;
 import org.activiti.engine.query.QueryProperty;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.DeploymentBuilder;
+import org.activiti.engine.task.Task;
 import org.activiti.rest.common.api.ActivitiUtil;
 import org.activiti.rest.common.api.SecuredResource;
 import org.activiti.rest.service.api.repository.DeploymentResponse;
@@ -32,6 +34,7 @@ import org.restlet.ext.fileupload.RestletFileUpload;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
+import org.restlet.resource.Put;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,69 +58,34 @@ public class TaskResource extends SecuredResource {
     }
 
     @Get
-    public TaskResponse getCustomResponse() {
-        return null;
-    }
-
-    @Post
-    public DeploymentResponse uploadDeployment(Representation entity) {
+    public TaskResponse retrieveTaskInformation() {
         if (!authenticate()) {
             return null;
         }
 
-        try {
+        String processName = getAttribute("process");
+        String instanceName = getAttribute("instance");
+        String taskName = getAttribute("task");
 
-            if (entity == null || entity.getMediaType() == null || !MediaType.MULTIPART_FORM_DATA.isCompatible(entity.getMediaType())) {
-                throw new ActivitiIllegalArgumentException("The request should be of type" + MediaType.MULTIPART_FORM_DATA + ".");
-            }
-
-            RestletFileUpload upload = new RestletFileUpload(new DiskFileItemFactory());
-            List<FileItem> items = upload.parseRepresentation(entity);
-
-            String tenantId = null;
-
-            FileItem uploadItem = null;
-            for (FileItem fileItem : items) {
-                if (fileItem.isFormField()) {
-                    if ("tenantId".equals(fileItem.getFieldName())) {
-                        tenantId = fileItem.getString("UTF-8");
-                    }
-                } else if (fileItem.getName() != null) {
-                    uploadItem = fileItem;
-                }
-            }
-
-            if (uploadItem == null) {
-                throw new ActivitiIllegalArgumentException("No file content was found in request body.");
-            }
-
-            DeploymentBuilder deploymentBuilder = ActivitiUtil.getRepositoryService().createDeployment();
-            String fileName = uploadItem.getName();
-            if (fileName.endsWith(".bpmn20.xml") || fileName.endsWith(".bpmn")) {
-                deploymentBuilder.addInputStream(fileName, uploadItem.getInputStream());
-            } else if (fileName.toLowerCase().endsWith(".bar") || fileName.toLowerCase().endsWith(".zip")) {
-                deploymentBuilder.addZipInputStream(new ZipInputStream(uploadItem.getInputStream()));
-            } else {
-                throw new ActivitiIllegalArgumentException("File must be of type .bpmn20.xml, .bpmn, .bar or .zip");
-            }
-            deploymentBuilder.name(fileName);
-
-            if (tenantId != null) {
-                deploymentBuilder.tenantId(tenantId);
-            }
-
-            Deployment deployment = deploymentBuilder.deploy();
-
-            setStatus(Status.SUCCESS_CREATED);
-
-            return getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory()
-                    .createDeploymentResponse(this, deployment);
-
-        } catch (Exception e) {
-            if (e instanceof ActivitiException) {
-                throw (ActivitiException) e;
-            }
-            throw new ActivitiException(e.getMessage(), e);
+        if (taskName == null) {
+            throw new ActivitiIllegalArgumentException("The task identifier cannot be null");
         }
+
+        // TODO: differentiate between regular user task and REST publish tasks (!)
+        Task requestedTask = ActivitiUtil.getTaskService().createTaskQuery().processDefinitionKey(processName)
+                .processInstanceId(instanceName).taskDefinitionKey(taskName).singleResult();
+        if (requestedTask == null) {
+            throw new ActivitiObjectNotFoundException("Could not find a task with id '" + taskName + "'.", Task.class);
+        }
+
+        return getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory()
+                .createTaskResponse(this, requestedTask);
     }
+
+//    @Put
+//    public DeploymentResponse updateTask(Representation entity) {
+//        if (!authenticate()) {
+//            return null;
+//        }
+//    }
 }
