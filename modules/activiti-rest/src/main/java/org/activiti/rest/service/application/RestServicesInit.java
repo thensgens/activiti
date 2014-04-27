@@ -145,7 +145,7 @@ public class RestServicesInit {
   public static void attachResources(Router router) {
     
     // Testing new REST-urls
-    router.attach("/poc/foobaz", POCResource.class);
+    router.attach("/poc/hellokitty", POCResource.class);
 
     // New REST-urls
     router.attach("/repository/deployments", DeploymentCollectionResource.class);
