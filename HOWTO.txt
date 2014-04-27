@@ -1,0 +1,10 @@
+Toolchain:
+
+1) use $activiti-root/distro in order to build 'activiti-explorer' and 'activiti-rest' (and all other modules)
+  1) cd to dir
+  2) 'ant clean distro'
+
+  This will ultimately build 'activiti-webapp-{explorer,rest]}2 projects and copy/move the resulting files
+  to $activiti-root/distro/target/zip/activiti-{version}/wars (+ renaming).
+  Afterwards the required WARs will be deployed on the (static) tomcat installation (see the build.xml for details).
+  This projects depends on the modules specified in $activiti-root/modules (e.g. activiti-rest) via maven.

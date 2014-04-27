@@ -1,0 +1,13 @@
+#!/bin/bash
+
+DISTRO_DIR="/home/user/Software/Activiti/distro"
+WAR_OUTPUT_DIR="$DISTRO_DIR/target/zip/activiti-5.15.1-SNAPSHOT/wars"
+EXPLORER_WAR="activiti-explorer.war"
+REST_WAR="activiti-rest.war"
+
+TOMCAT_INST_DIR="/home/user/Software/apache-tomcat-7.0.32"
+WEBAPPS_DIR="$TOMCAT_INST_DIR/webapps"
+
+# build the (root) project with ant and deploy the generated files if successful
+cd $DISTRO_DIR
+ant clean distro && cp "$WAR_OUTPUT_DIR/$EXPLORER_WAR" "$WEBAPPS_DIR/" && cp "$WAR_OUTPUT_DIR/$REST_WAR" "$WEBAPPS_DIR/"

@@ -21,10 +21,25 @@
       <param-value>org.activiti.rest.service.application.ActivitiRestServicesApplication</param-value>
     </init-param>
   </servlet>
+
+  <!-- Restlet adapter 2-->  
+  <servlet>  
+    <servlet-name>POCRestlet</servlet-name>  
+    <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
+    <init-param>
+      <!-- Application class name -->
+      <param-name>org.restlet.application</param-name>
+      <param-value>org.activiti.rest.service.application.POCRestServicesApplication</param-value>
+    </init-param>
+  </servlet>
   
   <!-- Catch all requests -->  
   <servlet-mapping>  
     <servlet-name>RestletServlet</servlet-name>  
     <url-pattern>/service/*</url-pattern>  
+  </servlet-mapping>  
+  <servlet-mapping>  
+    <servlet-name>POCRestlet</servlet-name>  
+    <url-pattern>/poc/*</url-pattern>  
   </servlet-mapping>  
 </web-app>

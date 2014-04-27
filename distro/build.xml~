@@ -130,6 +130,22 @@
 		<copy file="${target.distro.root}/wars/activiti-rest.war" todir="/home/user/Software/apache-tomcat-7.0.32/webapps"/>
 	</target>
 
+<!-- BAK
+	<target name="copy.webapps">
+		<mkdir dir="${target.distro.root}/wars" />
+		<copy todir="${target.distro.root}/wars">
+			<fileset dir="../modules/activiti-webapp-explorer2/target">
+				<include name="activiti-webapp-explorer*.war" />
+			</fileset>
+			<fileset dir="../modules/activiti-webapp-rest2/target">
+				<include name="activiti-webapp-rest*.war" />
+			</fileset>
+		</copy>
+		<move file="${target.distro.root}/wars/activiti-webapp-explorer2-${activiti.version}.war" tofile="${target.distro.root}/wars/activiti-explorer.war"/>
+		<move file="${target.distro.root}/wars/activiti-webapp-rest2-${activiti.version}.war" tofile="${target.distro.root}/wars/activiti-rest.war"/>
+	</target>
+-->
+
 	<target name="build.docs" unless="nodocs">
 		<!-- JAVADOCS -->
 		<exec executable="${mvn.executable}" dir="../modules/activiti-engine">

@@ -1,0 +1,5 @@
+- change 'activiti-webapp-rest2's web.xml; check if one can add new REST endpoints 
+   x) works for duplications ootb (copied one of the Resource classes)
+
+- automate 'activiti-distro' build => deploy the generated wars automatically on the (installed) tomcat
+   x) works (rule 'deploy-tomcat' in the activiti-root's build.xml)
