@@ -98,6 +98,7 @@ public class BpmnDeploymentTest extends PluggableActivitiTestCase {
     repositoryService.createDeployment().enableDuplicateFiltering().addClasspathResource(bpmnResourceName).name("twice").deploy();
     List<org.activiti.engine.repository.Deployment> deploymentList = repositoryService.createDeploymentQuery().list();
     assertEquals(1, deploymentList.size());
+
     
     repositoryService.deleteDeployment(deploymentId);
   }

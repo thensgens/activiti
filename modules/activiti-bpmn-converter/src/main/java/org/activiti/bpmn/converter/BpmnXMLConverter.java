@@ -132,8 +132,8 @@ public class BpmnXMLConverter implements BpmnXMLConstants {
     addConverter(new ReceiveTaskXMLConverter());
     addConverter(new ScriptTaskXMLConverter());
     addConverter(new ServiceTaskXMLConverter());
-    addConverter(new SendTaskXMLConverter());
-    addConverter(new UserTaskXMLConverter());
+        addConverter(new UserTaskXMLConverter());
+        addConverter(new SendTaskXMLConverter());
     addConverter(new TaskXMLConverter());
     addConverter(new CallActivityXMLConverter());
     
@@ -316,10 +316,10 @@ public class BpmnXMLConverter implements BpmnXMLConstants {
           
 				} else if (ELEMENT_ERROR.equals(xtr.getLocalName())) {
           
-          if (StringUtils.isNotEmpty(xtr.getAttributeValue(null, ATTRIBUTE_ID))) {
-            model.addError(xtr.getAttributeValue(null, ATTRIBUTE_ID),
-                xtr.getAttributeValue(null, ATTRIBUTE_ERROR_CODE));
-          }
+                    if (StringUtils.isNotEmpty(xtr.getAttributeValue(null, ATTRIBUTE_ID))) {
+                        model.addError(xtr.getAttributeValue(null, ATTRIBUTE_ID),
+                         xtr.getAttributeValue(null, ATTRIBUTE_ERROR_CODE));
+                     }
           
 				} else if (ELEMENT_IMPORT.equals(xtr.getLocalName())) {
 				  importParser.parse(xtr, model);

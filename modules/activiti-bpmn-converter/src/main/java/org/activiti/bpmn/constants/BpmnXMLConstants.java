@@ -60,9 +60,9 @@ public interface BpmnXMLConstants {
   public static final String ATTRIBUTE_PROCESS_CANDIDATE_USERS = "candidateStarterUsers";
   public static final String ATTRIBUTE_PROCESS_CANDIDATE_GROUPS = "candidateStarterGroups";
   public static final String ELEMENT_SUBPROCESS = "subProcess";
-  public static final String ATTRIBUTE_TRIGGERED_BY = "triggeredByEvent";
-  public static final String ELEMENT_TRANSACTION = "transaction";
-  
+    public static final String ELEMENT_TRANSACTION = "transaction";
+    public static final String ATTRIBUTE_TRIGGERED_BY = "triggeredByEvent";
+
   public static final String ELEMENT_EXTENSIONS = "extensionElements";
   
   public static final String ELEMENT_EXECUTION_LISTENER = "executionListener";
@@ -131,9 +131,9 @@ public interface BpmnXMLConstants {
   public static final String ELEMENT_TASK_RECEIVE = "receiveTask";
   public static final String ELEMENT_TASK_SCRIPT = "scriptTask";
   public static final String ELEMENT_TASK_SEND = "sendTask";
-  public static final String ELEMENT_TASK_SERVICE = "serviceTask";
   public static final String ELEMENT_TASK_USER = "userTask";
-  public static final String ELEMENT_CALL_ACTIVITY = "callActivity";
+    public static final String ELEMENT_TASK_SERVICE = "serviceTask";
+    public static final String ELEMENT_CALL_ACTIVITY = "callActivity";
   
   public static final String ATTRIBUTE_EVENT_START_INITIATOR = "initiator";
   public static final String ATTRIBUTE_FORM_FORMKEY = "formKey";

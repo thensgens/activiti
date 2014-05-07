@@ -122,10 +122,10 @@ public class ExecutionEntity extends VariableScopeImpl implements ActivityExecut
    *   <li>an execution is ended.</li>
    * </ul>*/ 
   protected boolean isActive = true;
-  protected boolean isScope = true;
-  protected boolean isConcurrent = false;
-  protected boolean isEnded = false;
-  protected boolean isEventScope = false;
+    protected boolean isScope = true;
+    protected boolean isConcurrent = false;
+    protected boolean isEnded = false;
+    protected boolean isEventScope = false;
   
   // events ///////////////////////////////////////////////////////////////////
   

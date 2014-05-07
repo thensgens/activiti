@@ -79,30 +79,30 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
       } else if (ImplementationType.IMPLEMENTATION_TYPE_WEBSERVICE.equalsIgnoreCase(serviceTask.getImplementationType()) && 
           StringUtils.isNotEmpty(serviceTask.getOperationRef())) {
         
-        if (!bpmnParse.getOperations().containsKey(serviceTask.getOperationRef())) {
-        	logger.warn(serviceTask.getOperationRef() + " does not exist for service task " + serviceTask.getId());
-        } else {
-          
-          WebServiceActivityBehavior webServiceActivityBehavior = bpmnParse.getActivityBehaviorFactory().createWebServiceActivityBehavior(serviceTask);
-          webServiceActivityBehavior.setOperation(bpmnParse.getOperations().get(serviceTask.getOperationRef()));
+            if (!bpmnParse.getOperations().containsKey(serviceTask.getOperationRef())) {
+                logger.warn(serviceTask.getOperationRef() + " does not exist for service task " + serviceTask.getId());
+            } else {
 
-          if (serviceTask.getIoSpecification() != null) {
-            IOSpecification ioSpecification = createIOSpecification(bpmnParse, serviceTask.getIoSpecification());
-            webServiceActivityBehavior.setIoSpecification(ioSpecification);
-          }
+              WebServiceActivityBehavior webServiceActivityBehavior = bpmnParse.getActivityBehaviorFactory().createWebServiceActivityBehavior(serviceTask);
+              webServiceActivityBehavior.setOperation(bpmnParse.getOperations().get(serviceTask.getOperationRef()));
 
-          for (DataAssociation dataAssociationElement : serviceTask.getDataInputAssociations()) {
-            AbstractDataAssociation dataAssociation = createDataInputAssociation(bpmnParse, dataAssociationElement);
-            webServiceActivityBehavior.addDataInputAssociation(dataAssociation);
-          }
+              if (serviceTask.getIoSpecification() != null) {
+                IOSpecification ioSpecification = createIOSpecification(bpmnParse, serviceTask.getIoSpecification());
+                webServiceActivityBehavior.setIoSpecification(ioSpecification);
+              }
 
-          for (DataAssociation dataAssociationElement : serviceTask.getDataOutputAssociations()) {
-            AbstractDataAssociation dataAssociation = createDataOutputAssociation(bpmnParse, dataAssociationElement);
-            webServiceActivityBehavior.addDataOutputAssociation(dataAssociation);
-          }
+              for (DataAssociation dataAssociationElement : serviceTask.getDataInputAssociations()) {
+                AbstractDataAssociation dataAssociation = createDataInputAssociation(bpmnParse, dataAssociationElement);
+                webServiceActivityBehavior.addDataInputAssociation(dataAssociation);
+              }
 
-          activity.setActivityBehavior(webServiceActivityBehavior);
-        }
+              for (DataAssociation dataAssociationElement : serviceTask.getDataOutputAssociations()) {
+                AbstractDataAssociation dataAssociation = createDataOutputAssociation(bpmnParse, dataAssociationElement);
+                webServiceActivityBehavior.addDataOutputAssociation(dataAssociation);
+              }
+
+              activity.setActivityBehavior(webServiceActivityBehavior);
+            }
       } else {
         logger.warn("One of the attributes 'class', 'delegateExpression', 'type', 'operation', or 'expression' is mandatory on serviceTask " + serviceTask.getId());
       }
