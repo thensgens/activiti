@@ -6,5 +6,5 @@ Toolchain:
 
   This will ultimately build 'activiti-webapp-{explorer,rest]}2 projects and copy/move the resulting files
   to $activiti-root/distro/target/zip/activiti-{version}/wars (+ renaming).
-  Afterwards the required WARs will be deployed on the (static) tomcat installation (see the build.xml for details).
+  Afterwards the required WARs will be deployed on the (static) tomcat installation (see ant's build.xml for details).
   This projects depends on the modules specified in $activiti-root/modules (e.g. activiti-rest) via maven.

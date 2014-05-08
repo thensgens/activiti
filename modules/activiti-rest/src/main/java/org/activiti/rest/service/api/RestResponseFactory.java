@@ -114,46 +114,46 @@ public class RestResponseFactory {
     initializeVariableConverters();
   }
   
-  public TaskResponse createTaskResponse(SecuredResource securedResource, Task task) {
-    TaskResponse response = new TaskResponse(task);
-    response.setUrl(securedResource.createFullResourceUrl(RestUrls.URL_TASK, task.getId()));
-
-    // Add references to other resources, if needed
-    if (response.getParentTaskId() != null) {
-      response.setParentTaskUrl(securedResource.createFullResourceUrl(RestUrls.URL_TASK, response.getParentTaskId()));
-    }
-    if (response.getProcessDefinitionId() != null) {
-      response.setProcessDefinitionUrl(securedResource.createFullResourceUrl(RestUrls.URL_PROCESS_DEFINITION, response.getProcessDefinitionId()));
-    }
-    if (response.getExecutionId() != null) {
-      response.setExecutionUrl(securedResource.createFullResourceUrl(RestUrls.URL_EXECUTION, response.getExecutionId()));
-    }
-    if (response.getProcessInstanceId() != null) {
-      response.setProcessInstanceUrl(securedResource.createFullResourceUrl(RestUrls.URL_PROCESS_INSTANCE, response.getProcessInstanceId()));
-    }
-    
-    if (task.getProcessVariables() != null) {
-      Map<String, Object> variableMap = task.getProcessVariables();
-      for (String name : variableMap.keySet()) {
-        response.addVariable(createRestVariable(securedResource, name, variableMap.get(name), 
-            RestVariableScope.GLOBAL, task.getId(), VARIABLE_TASK, false));
-      }
-    }
-    if (task.getTaskLocalVariables() != null) {
-      Map<String, Object> variableMap = task.getTaskLocalVariables();
-      for (String name : variableMap.keySet()) {
-        response.addVariable(createRestVariable(securedResource, name, variableMap.get(name), 
-            RestVariableScope.LOCAL, task.getId(), VARIABLE_TASK, false));
-      }
-    }
-    
-    return response;
-  }
-  
   public DeploymentResponse createDeploymentResponse(SecuredResource resourceContext, Deployment deployment) {
     return new DeploymentResponse(deployment, resourceContext.createFullResourceUrl(RestUrls.URL_DEPLOYMENT, deployment.getId()));
   }
-  
+
+    public TaskResponse createTaskResponse(SecuredResource securedResource, Task task) {
+        TaskResponse response = new TaskResponse(task);
+        response.setUrl(securedResource.createFullResourceUrl(RestUrls.URL_TASK, task.getId()));
+
+        // Add references to other resources, if needed
+        if (response.getParentTaskId() != null) {
+            response.setParentTaskUrl(securedResource.createFullResourceUrl(RestUrls.URL_TASK, response.getParentTaskId()));
+        }
+        if (response.getProcessDefinitionId() != null) {
+            response.setProcessDefinitionUrl(securedResource.createFullResourceUrl(RestUrls.URL_PROCESS_DEFINITION, response.getProcessDefinitionId()));
+        }
+        if (response.getExecutionId() != null) {
+            response.setExecutionUrl(securedResource.createFullResourceUrl(RestUrls.URL_EXECUTION, response.getExecutionId()));
+        }
+        if (response.getProcessInstanceId() != null) {
+            response.setProcessInstanceUrl(securedResource.createFullResourceUrl(RestUrls.URL_PROCESS_INSTANCE, response.getProcessInstanceId()));
+        }
+
+        if (task.getProcessVariables() != null) {
+            Map<String, Object> variableMap = task.getProcessVariables();
+            for (String name : variableMap.keySet()) {
+                response.addVariable(createRestVariable(securedResource, name, variableMap.get(name),
+                        RestVariableScope.GLOBAL, task.getId(), VARIABLE_TASK, false));
+            }
+        }
+        if (task.getTaskLocalVariables() != null) {
+            Map<String, Object> variableMap = task.getTaskLocalVariables();
+            for (String name : variableMap.keySet()) {
+                response.addVariable(createRestVariable(securedResource, name, variableMap.get(name),
+                        RestVariableScope.LOCAL, task.getId(), VARIABLE_TASK, false));
+            }
+        }
+
+        return response;
+    }
+
   public DeploymentResourceResponse createDeploymentResourceResponse(SecuredResource resourceContext, String deploymentId, String resourceId) {
     // Create URL's
     String resourceUrl = resourceContext.createFullResourceUrl(RestUrls.URL_DEPLOYMENT_RESOURCE, deploymentId, resourceId);

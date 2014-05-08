@@ -59,7 +59,7 @@ public class POCResource extends SecuredResource {
     allowedSortProperties.put("tenantId", DeploymentQueryProperty.DEPLOYMENT_TENANT_ID);
   }
   
-  @Get
+ /* @Get
   public DataResponse getDeployments() {
   	if(!authenticate()) { return null; }
   	
@@ -98,7 +98,39 @@ public class POCResource extends SecuredResource {
         deploymentQuery, "id", allowedSortProperties);
     return response;
   }
-  
+  */
+
+  @Get
+  public MyCustomResponse getCustomResponse() {
+      return new MyCustomResponse("Torben", 42);
+  }
+
+  class MyCustomResponse {
+      String customName;
+      int magicNumber;
+
+      public MyCustomResponse(String name, int number) {
+          this.customName = name;
+          this.magicNumber = number;
+      }
+
+      public String getCustomName() {
+          return this.customName;
+      }
+
+      public void setCustomName(String name) {
+          this.customName = name;
+      }
+
+      public int getMagicNumber() {
+          return this.magicNumber;
+      }
+
+      public void setMagicNumber(int number) {
+          this.magicNumber = number;
+      }
+  }
+
   @Post
   public DeploymentResponse uploadDeployment(Representation entity) {
   	if(!authenticate()) { return null; }

@@ -147,6 +147,7 @@ public class RestServicesInit {
     // Testing new REST-urls
     router.attach("/poc/hellokitty", POCResource.class);
 
+
     // New REST-urls
     router.attach("/repository/deployments", DeploymentCollectionResource.class);
     router.attach("/repository/deployments/{deploymentId}", DeploymentResource.class);

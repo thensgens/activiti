@@ -109,6 +109,10 @@ public class ProcessEngineImpl implements ProcessEngine {
     		ActivitiEventBuilder.createGlobalEvent(ActivitiEventType.ENGINE_CLOSED));
   }
 
+    public void sayHello() {
+        System.out.println("Hello from 'ProcessEngineImpl !!!'");
+    }
+
   // getters and setters //////////////////////////////////////////////////////
 
   public String getName() {

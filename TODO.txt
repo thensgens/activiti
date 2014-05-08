@@ -1,5 +1,9 @@
-- change 'activiti-webapp-rest2's web.xml; check if one can add new REST endpoints 
-   x) works for duplications ootb (copied one of the Resource classes)
+Necessary steps for the proof-of-concept:
 
-- automate 'activiti-distro' build => deploy the generated wars automatically on the (installed) tomcat
-   x) works (rule 'deploy-tomcat' in the activiti-root's build.xml)
+1) Deploy and run a process which includes so called 'REST-Activities'.
+   These activities should be exposed via REST.
+     - GET requests on these activies should return e.g. 'the status'.
+     - PUT requests on these activies should return e.g. 'end the execution'.
+
+
+2) New REST Webservice Task (alternative for current (SOAP-)Webservice task).
