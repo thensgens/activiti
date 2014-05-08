@@ -3,7 +3,10 @@ Necessary steps for the proof-of-concept:
 1) Deploy and run a process which includes so called 'REST-Activities'.
    These activities should be exposed via REST.
      - GET requests on these activies should return e.g. 'the status'.
-     - PUT requests on these activies should return e.g. 'end the execution'.
+     - PUT requests on these activies should return e.g. 'end the execution'. or(!)
+       control the process flow (see 3) )
 
 
 2) New REST Webservice Task (alternative for current (SOAP-)Webservice task).
+
+3) Emulate published (PUT-)Rest via UserTasks (in order to complete and control the flow)
