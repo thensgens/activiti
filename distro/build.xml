@@ -22,6 +22,7 @@
 	   copy.dependencies,
 	   copy.webapps,
 	   deploy.tomcat,
+	   remove.old.deployments,
 	   copy.docs,
 	   copy.sql">
 		<zip destfile="${target.distro.root}.zip">
@@ -130,6 +131,11 @@
 		<copy file="${target.distro.root}/wars/activiti-rest.war" todir="/home/user/Software/apache-tomcat-7.0.32/webapps"/>
 	</target>
 
+	<target name="remove.old.deployments">
+	  <delete dir="/home/user/Software/apache-tomcat-7.0.32/webapps/activiti-explorer"/>
+	  <delete dir="/home/user/Software/apache-tomcat-7.0.32/webapps/activiti-rest"/>
+	</target>
+
 	<target name="build.docs" unless="nodocs">
 		<!-- JAVADOCS -->
 		<exec executable="${mvn.executable}" dir="../modules/activiti-engine">
@@ -184,5 +190,6 @@
 			</fileset>
 		</copy>
 	</target>
+
 
 </project>
