@@ -8,3 +8,11 @@ Toolchain:
   to $activiti-root/distro/target/zip/activiti-{version}/wars (+ renaming).
   Afterwards the required WARs will be deployed on the (static) tomcat installation (see ant's build.xml for details).
   This projects depends on the modules specified in $activiti-root/modules (e.g. activiti-rest) via maven.
+
+
+
+=============================================
+How-To add dependencies:
+
+Currently: Add a maven dependency in either "activiti-explorer" or "activiti-rest" project. The next Activiti distro
+build will fetch and install all new dependencies and deploy the WAR on the (static) Tomcat installation.
