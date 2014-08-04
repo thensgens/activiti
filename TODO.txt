@@ -1,13 +1,12 @@
-1) Deploy and run a process which includes so called 'REST-Activities'.
+1) New 'REST Consumer Task' (alternative for current (SOAP-)Webservice task).
+	- simple proof-of-concept REST task implemented
+	- needs finalization (input fields/options/icons/...)
+
+2) Deploy and run a process which includes so called 'REST-Activities'.
    These activities should be exposed via REST.
      - GET requests on these activies should return e.g. 'the status'.
      - PUT requests on these activies should return e.g. 'end the execution'. or(!)
-       control the process flow (see 3) )
-
-
-2) New REST Webservice Task (alternative for current (SOAP-)Webservice task).
-	- simple proof-of-concept REST task implemented
-	- still needs finalization (input fields/options/icons/...)
+       control the process flow (see Notes/Problems (1))
 
 3) Emulate published (PUT-)Rest via UserTasks (in order to complete and control the flow)
 
@@ -17,8 +16,11 @@
 
 ==================================================================================================
 
-Notes:
+Notes/Problems:
 
-3) Still unknown how these user tasks could be emulated/implemented. Possibilities:
+(1) Still unknown how these user tasks could be emulated/implemented. Possibilities:
 	- extend/change the deployer (deployer will behave differently if it encounters certain indicators,
 	  e.g. manually replacing service tasks with user tasks in the corresponding xml file)
+
+(2) [SOVLED] Error 415 while trying to use the REST User Task API (e.g. completing a task)
+	=> make sure that the client actually uses 'Content-Type: application-json' (!)

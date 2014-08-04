@@ -301,7 +301,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   
   protected SqlSessionFactory sqlSessionFactory;
   protected TransactionFactory transactionFactory;
-  
+
   protected Set<Class<?>> customMybatisMappers;
 
   // ID GENERATOR /////////////////////////////////////////////////////////////
