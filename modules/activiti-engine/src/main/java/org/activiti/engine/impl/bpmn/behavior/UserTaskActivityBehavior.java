@@ -43,6 +43,9 @@ public class UserTaskActivityBehavior extends TaskActivityBehavior {
   }
 
   public void execute(ActivityExecution execution) throws Exception {
+
+    System.out.println("Hello from UserTaskActivityBehavior's execute method..");
+
     TaskEntity task = TaskEntity.createAndInsert(execution);
     task.setExecution(execution);
     task.setTaskDefinition(taskDefinition);
