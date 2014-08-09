@@ -42,6 +42,11 @@ public class ServiceTaskXMLConverter extends BaseBpmnXMLConverter {
   protected BaseElement convertXMLToElement(XMLStreamReader xtr, BpmnModel model) throws Exception {
 		ServiceTask serviceTask = new ServiceTask();
 		BpmnXMLUtil.addXMLLocation(serviceTask, xtr);
+
+        if (StringUtils.isNotEmpty(xtr.getAttributeValue(ACTIVITI_EXTENSIONS_NAMESPACE, "foo"))) {
+            serviceTask.setImplementation("foo");
+            serviceTask.setImplementationType("foo");
+        }
 		if (StringUtils.isNotEmpty(xtr.getAttributeValue(ACTIVITI_EXTENSIONS_NAMESPACE, ATTRIBUTE_TASK_SERVICE_CLASS))) {
 			serviceTask.setImplementationType(ImplementationType.IMPLEMENTATION_TYPE_CLASS);
 			serviceTask.setImplementation(xtr.getAttributeValue(ACTIVITI_EXTENSIONS_NAMESPACE, ATTRIBUTE_TASK_SERVICE_CLASS));

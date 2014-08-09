@@ -13,19 +13,16 @@
 package org.activiti.engine.impl.bpmn.behavior;
 
 
-
-
 /**
- * implementation of the 'none start event': a start event that has no 
+ * implementation of the 'none start event': a start event that has no
  * specific trigger but the programmatic one (processService.startProcessInstanceXXX()).
- * 
- * 
+ *
  * @author Joram Barrez
  */
 public class NoneStartEventActivityBehavior extends FlowNodeActivityBehavior {
 
-  // Nothing to see here.
-  // The default behaviour of the BpmnActivity is exactly what
-  // a none start event should be doing.
-  
+    // Nothing to see here.
+    // The default behaviour of the BpmnActivity is exactly what
+    // a none start event should be doing.
+
 }

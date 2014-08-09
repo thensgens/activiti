@@ -23,25 +23,25 @@ import org.activiti.engine.impl.pvm.runtime.InterpretableExecution;
  */
 public class TerminateEndEventActivityBehavior extends FlowNodeActivityBehavior {
 
-  public void execute(ActivityExecution execution) throws Exception {
-    
-    PvmActivity terminateEndEventActivity = execution.getActivity();    
-    ActivityExecution scopeExecution = ScopeUtil.findScopeExecution(execution);
-    
-    // destroy the scope
-    scopeExecution.destroyScope("terminate end event fired");
-    
-    // set the scope execution to the terminate end event and make it end here.
-    // (the history should reflect that the execution ended here and we want an 'end time' for the 
-    // historic activity instance.)
-    ((InterpretableExecution)scopeExecution).setActivity((ActivityImpl) terminateEndEventActivity);
-    // end the scope execution
-    scopeExecution.end();
-  }
-  
-  
-  // If we use this implementation, we run into trouble in the DbSqlSession, see ACT-1382
-  
+    public void execute(ActivityExecution execution) throws Exception {
+
+        PvmActivity terminateEndEventActivity = execution.getActivity();
+        ActivityExecution scopeExecution = ScopeUtil.findScopeExecution(execution);
+
+        // destroy the scope
+        scopeExecution.destroyScope("terminate end event fired");
+
+        // set the scope execution to the terminate end event and make it end here.
+        // (the history should reflect that the execution ended here and we want an 'end time' for the
+        // historic activity instance.)
+        ((InterpretableExecution) scopeExecution).setActivity((ActivityImpl) terminateEndEventActivity);
+        // end the scope execution
+        scopeExecution.end();
+    }
+
+
+    // If we use this implementation, we run into trouble in the DbSqlSession, see ACT-1382
+
 //  public void execute(ActivityExecution execution) throws Exception {
 //    
 //    PvmActivity terminateEndEventActivity = execution.getActivity();

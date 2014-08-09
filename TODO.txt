@@ -24,3 +24,7 @@ Notes/Problems:
 
 (2) [SOVLED] Error 415 while trying to use the REST User Task API (e.g. completing a task)
 	=> make sure that the client actually uses 'Content-Type: application-json' (!)
+
+(3) - Idea for 2): See 'UserTaskParseHandler' and 'ServiceTaskParseHandler' for reference. Adjust the user task process
+    to the service tasks.
+    - maybe clone/create execution when process flow hits the custom task (in order to emulate a user task afterwards)

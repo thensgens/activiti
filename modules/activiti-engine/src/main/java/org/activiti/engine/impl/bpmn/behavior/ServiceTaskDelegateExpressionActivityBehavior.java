@@ -32,75 +32,75 @@ import org.activiti.engine.impl.pvm.delegate.SignallableActivityBehavior;
 /**
  * {@link ActivityBehavior} used when 'delegateExpression' is used
  * for a serviceTask.
- * 
+ *
  * @author Joram Barrez
  * @author Josh Long
  * @author Slawomir Wojtasiak (Patch for ACT-1159)
  * @author Falko Menge
  */
 public class ServiceTaskDelegateExpressionActivityBehavior extends TaskActivityBehavior {
-  
-  protected Expression expression;
-  private final List<FieldDeclaration> fieldDeclarations;
-  
-  public ServiceTaskDelegateExpressionActivityBehavior(Expression expression, List<FieldDeclaration> fieldDeclarations) {
-    this.expression = expression;
-    this.fieldDeclarations = fieldDeclarations;
-  }
 
-  @Override
-  public void signal(ActivityExecution execution, String signalName, Object signalData) throws Exception {
-    Object delegate = expression.getValue(execution);
-    if( delegate instanceof SignallableActivityBehavior){
-      ClassDelegate.applyFieldDeclaration(fieldDeclarations, delegate);
-      ((SignallableActivityBehavior) delegate).signal( execution , signalName , signalData);
+    protected Expression expression;
+    private final List<FieldDeclaration> fieldDeclarations;
+
+    public ServiceTaskDelegateExpressionActivityBehavior(Expression expression, List<FieldDeclaration> fieldDeclarations) {
+        this.expression = expression;
+        this.fieldDeclarations = fieldDeclarations;
     }
-  }
 
-	public void execute(ActivityExecution execution) throws Exception {
-
-    try {
-
-      // Note: we can't cache the result of the expression, because the
-      // execution can change: eg. delegateExpression='${mySpringBeanFactory.randomSpringBean()}'
-      Object delegate = expression.getValue(execution);
-      ClassDelegate.applyFieldDeclaration(fieldDeclarations, delegate);
-
-      if (delegate instanceof ActivityBehavior) {
-        Context.getProcessEngineConfiguration()
-          .getDelegateInterceptor()
-          .handleInvocation(new ActivityBehaviorInvocation((ActivityBehavior) delegate, execution));
-
-      } else if (delegate instanceof JavaDelegate) {
-        Context.getProcessEngineConfiguration()
-          .getDelegateInterceptor()
-          .handleInvocation(new JavaDelegateInvocation((JavaDelegate) delegate, execution));
-        leave(execution);
-
-      } else {
-        throw new ActivitiIllegalArgumentException("Delegate expression " + expression
-                + " did neither resolve to an implementation of " + ActivityBehavior.class
-                + " nor " + JavaDelegate.class);
-      }
-    } catch (Exception exc) {
-
-      Throwable cause = exc;
-      BpmnError error = null;
-      while (cause != null) {
-        if (cause instanceof BpmnError) {
-          error = (BpmnError) cause;
-          break;
+    @Override
+    public void signal(ActivityExecution execution, String signalName, Object signalData) throws Exception {
+        Object delegate = expression.getValue(execution);
+        if (delegate instanceof SignallableActivityBehavior) {
+            ClassDelegate.applyFieldDeclaration(fieldDeclarations, delegate);
+            ((SignallableActivityBehavior) delegate).signal(execution, signalName, signalData);
         }
-        cause = cause.getCause();
-      }
-
-      if (error != null) {
-        ErrorPropagation.propagateError(error, execution);
-      } else {
-        throw exc;
-      }
-
     }
-  }
+
+    public void execute(ActivityExecution execution) throws Exception {
+
+        try {
+
+            // Note: we can't cache the result of the expression, because the
+            // execution can change: eg. delegateExpression='${mySpringBeanFactory.randomSpringBean()}'
+            Object delegate = expression.getValue(execution);
+            ClassDelegate.applyFieldDeclaration(fieldDeclarations, delegate);
+
+            if (delegate instanceof ActivityBehavior) {
+                Context.getProcessEngineConfiguration()
+                        .getDelegateInterceptor()
+                        .handleInvocation(new ActivityBehaviorInvocation((ActivityBehavior) delegate, execution));
+
+            } else if (delegate instanceof JavaDelegate) {
+                Context.getProcessEngineConfiguration()
+                        .getDelegateInterceptor()
+                        .handleInvocation(new JavaDelegateInvocation((JavaDelegate) delegate, execution));
+                leave(execution);
+
+            } else {
+                throw new ActivitiIllegalArgumentException("Delegate expression " + expression
+                        + " did neither resolve to an implementation of " + ActivityBehavior.class
+                        + " nor " + JavaDelegate.class);
+            }
+        } catch (Exception exc) {
+
+            Throwable cause = exc;
+            BpmnError error = null;
+            while (cause != null) {
+                if (cause instanceof BpmnError) {
+                    error = (BpmnError) cause;
+                    break;
+                }
+                cause = cause.getCause();
+            }
+
+            if (error != null) {
+                ErrorPropagation.propagateError(error, execution);
+            } else {
+                throw exc;
+            }
+
+        }
+    }
 
 }

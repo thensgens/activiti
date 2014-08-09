@@ -42,39 +42,7 @@ import org.activiti.bpmn.model.Transaction;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.delegate.Expression;
-import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.BoundaryEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.BusinessRuleTaskActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.CallActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.CancelBoundaryEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.CancelEndEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ErrorEndEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.EventBasedGatewayActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.EventSubProcessStartEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ExclusiveGatewayActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.InclusiveGatewayActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.IntermediateCatchEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.IntermediateThrowCompensationEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.IntermediateThrowNoneEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.IntermediateThrowSignalEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.MailActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ManualTaskActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.NoneEndEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.NoneStartEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ParallelGatewayActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ReceiveTaskActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ScriptTaskActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ServiceTaskDelegateExpressionActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ServiceTaskExpressionActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.ShellActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.SubProcessActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.TaskActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.TerminateEndEventActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.TransactionActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
-import org.activiti.engine.impl.bpmn.behavior.WebServiceActivityBehavior;
+import org.activiti.engine.impl.bpmn.behavior.*;
 import org.activiti.engine.impl.bpmn.data.SimpleDataInputAssociation;
 import org.activiti.engine.impl.bpmn.helper.ClassDelegate;
 import org.activiti.engine.impl.bpmn.parser.CompensateEventDefinition;
@@ -98,7 +66,6 @@ import org.apache.commons.lang3.StringUtils;
 public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory implements ActivityBehaviorFactory {
   
   // Start event
-
   public NoneStartEventActivityBehavior createNoneStartEventActivityBehavior(StartEvent startEvent) {
     return new NoneStartEventActivityBehavior();
   }
@@ -108,7 +75,6 @@ public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory impl
   }
   
   // Task
-  
   public TaskActivityBehavior createTaskActivityBehavior(Task task) {
     return new TaskActivityBehavior();
   }
@@ -125,8 +91,12 @@ public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory impl
     return new UserTaskActivityBehavior(taskDefinition);
   }
 
+  // Foo task
+  public FooActivityBehavior createFooServiceTask(ServiceTask serviceTase, TaskDefinition taskDefinition) {
+    return new FooActivityBehavior(taskDefinition);
+  }
+
   // Service task
-  
   public ClassDelegate createClassDelegateServiceTask(ServiceTask serviceTask) {
     return new ClassDelegate(serviceTask.getImplementation(), createFieldDeclarations(serviceTask.getFieldExtensions()));
   }
@@ -251,7 +221,6 @@ public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory impl
   }
   
   // Script task
-
   public ScriptTaskActivityBehavior createScriptTaskActivityBehavior(ScriptTask scriptTask) {
     String language = scriptTask.getScriptFormat();
     if (language == null) {
@@ -261,7 +230,6 @@ public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory impl
   }
 
   // Gateways
-
   public ExclusiveGatewayActivityBehavior createExclusiveGatewayActivityBehavior(ExclusiveGateway exclusiveGateway) {
     return new ExclusiveGatewayActivityBehavior();
   }
@@ -279,7 +247,6 @@ public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory impl
   }
 
   // Multi Instance
-
   public SequentialMultiInstanceBehavior createSequentialMultiInstanceBehavior(ActivityImpl activity, AbstractBpmnActivityBehavior innerActivityBehavior) {
     return new SequentialMultiInstanceBehavior(activity, innerActivityBehavior);
   }
@@ -289,13 +256,11 @@ public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory impl
   }
   
   // Subprocess
-  
   public SubProcessActivityBehavior createSubprocActivityBehavior(SubProcess subProcess) {
     return new SubProcessActivityBehavior();
   }
   
   // Call activity
-  
   public CallActivityBehavior createCallActivityBehavior(CallActivity callActivity) {
     String expressionRegex = "\\$+\\{+.+\\}";
     
@@ -328,13 +293,11 @@ public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory impl
   }
   
   // Transaction
-  
   public TransactionActivityBehavior createTransactionActivityBehavior(Transaction transaction) {
     return new TransactionActivityBehavior();
   }
 
   // Intermediate Events
-  
   public IntermediateCatchEventActivityBehavior createIntermediateCatchEventActivityBehavior(IntermediateCatchEvent intermediateCatchEvent) {
     return new IntermediateCatchEventActivityBehavior();
   }
@@ -354,7 +317,6 @@ public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory impl
   }
   
   // End events
-  
   public NoneEndEventActivityBehavior createNoneEndEventActivityBehavior(EndEvent endEvent) {
     return new NoneEndEventActivityBehavior();
   }
@@ -372,7 +334,6 @@ public class DefaultActivityBehaviorFactory extends AbstractBehaviorFactory impl
   }
 
   // Boundary Events
-  
   public BoundaryEventActivityBehavior createBoundaryEventActivityBehavior(BoundaryEvent boundaryEvent, boolean interrupting, ActivityImpl activity) {
     return new BoundaryEventActivityBehavior(interrupting, activity.getId());
   }

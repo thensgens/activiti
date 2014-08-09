@@ -16,8 +16,10 @@ package org.activiti.engine.impl.bpmn.behavior;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.ExecutionListener;
 import org.activiti.engine.delegate.JavaDelegate;
+import org.activiti.engine.delegate.TaskListener;
 import org.activiti.engine.impl.context.Context;
 import org.activiti.engine.impl.delegate.JavaDelegateInvocation;
+import org.activiti.engine.impl.persistence.entity.TaskEntity;
 import org.activiti.engine.impl.pvm.delegate.ActivityBehavior;
 import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 
@@ -26,31 +28,38 @@ import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
  * @author Tom Baeyens
  */
 public class ServiceTaskJavaDelegateActivityBehavior extends TaskActivityBehavior implements ActivityBehavior, ExecutionListener {
-  
-  protected JavaDelegate javaDelegate;
-  
-  protected ServiceTaskJavaDelegateActivityBehavior() {
-  }
 
-  public ServiceTaskJavaDelegateActivityBehavior(JavaDelegate javaDelegate) {
-    this.javaDelegate = javaDelegate;
-  }
+    protected JavaDelegate javaDelegate;
 
-  public void execute(ActivityExecution execution) throws Exception {
-    execute((DelegateExecution) execution);
-    leave(execution);
-  }
-  
-  public void notify(DelegateExecution execution) throws Exception {
-    execute((DelegateExecution) execution);
-  }
-  
-  public void execute(DelegateExecution execution) throws Exception {
+    protected ServiceTaskJavaDelegateActivityBehavior() {
+    }
 
-    System.out.println("Hello from ServiceTaskJavaDelegateActivityBehavior's execute (DelegateExecution) method..");
+    public ServiceTaskJavaDelegateActivityBehavior(JavaDelegate javaDelegate) {
+        this.javaDelegate = javaDelegate;
+    }
 
-    Context.getProcessEngineConfiguration()
-      .getDelegateInterceptor()
-      .handleInvocation(new JavaDelegateInvocation(javaDelegate, execution));    
-  }
+    public void execute(ActivityExecution execution) throws Exception {
+        TaskEntity task = TaskEntity.createAndInsert(execution);
+        task.setExecution(execution);
+        task.setAssignee("kermit");
+
+        task.fireEvent(TaskListener.EVENTNAME_CREATE);
+
+        execute((DelegateExecution) execution);
+        leave(execution);
+    }
+
+    public void notify(DelegateExecution execution) throws Exception {
+        execute((DelegateExecution) execution);
+    }
+
+    public void execute(DelegateExecution execution) throws Exception {
+
+        System.out.println("Hello from ServiceTaskJavaDelegateActivityBehavior's execute (DelegateExecution) method..");
+
+
+        Context.getProcessEngineConfiguration()
+                .getDelegateInterceptor()
+                .handleInvocation(new JavaDelegateInvocation(javaDelegate, execution));
+    }
 }

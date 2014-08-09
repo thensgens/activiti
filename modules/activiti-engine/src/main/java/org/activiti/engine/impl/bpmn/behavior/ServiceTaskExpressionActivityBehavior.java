@@ -20,9 +20,9 @@ import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
 
 
 /**
- * ActivityBehavior that evaluates an expression when executed. Optionally, it sets the result 
+ * ActivityBehavior that evaluates an expression when executed. Optionally, it sets the result
  * of the expression as a variable on the execution.
- * 
+ *
  * @author Tom Baeyens
  * @author Christian Stettler
  * @author Frederik Heremans
@@ -31,39 +31,39 @@ import org.activiti.engine.impl.pvm.delegate.ActivityExecution;
  */
 public class ServiceTaskExpressionActivityBehavior extends TaskActivityBehavior {
 
-  protected Expression expression;
-  protected String resultVariable;
+    protected Expression expression;
+    protected String resultVariable;
 
-  public ServiceTaskExpressionActivityBehavior(Expression expression, String resultVariable) {
-    this.expression = expression;
-    this.resultVariable = resultVariable;
-  }
-
-  public void execute(ActivityExecution execution) throws Exception {
-	Object value = null;
-	try {
-		value = expression.getValue(execution);
-		if (resultVariable != null) {
-		    execution.setVariable(resultVariable, value);
-		}
-		leave(execution);
-    } catch (Exception exc) {
-
-      Throwable cause = exc;
-      BpmnError error = null;
-      while (cause != null) {
-        if (cause instanceof BpmnError) {
-          error = (BpmnError) cause;
-          break;
-        }
-        cause = cause.getCause();
-      }
-
-      if (error != null) {
-        ErrorPropagation.propagateError(error, execution);
-      } else {
-        throw exc;
-      }
+    public ServiceTaskExpressionActivityBehavior(Expression expression, String resultVariable) {
+        this.expression = expression;
+        this.resultVariable = resultVariable;
     }
-  }
+
+    public void execute(ActivityExecution execution) throws Exception {
+        Object value = null;
+        try {
+            value = expression.getValue(execution);
+            if (resultVariable != null) {
+                execution.setVariable(resultVariable, value);
+            }
+            leave(execution);
+        } catch (Exception exc) {
+
+            Throwable cause = exc;
+            BpmnError error = null;
+            while (cause != null) {
+                if (cause instanceof BpmnError) {
+                    error = (BpmnError) cause;
+                    break;
+                }
+                cause = cause.getCause();
+            }
+
+            if (error != null) {
+                ErrorPropagation.propagateError(error, execution);
+            } else {
+                throw exc;
+            }
+        }
+    }
 }
