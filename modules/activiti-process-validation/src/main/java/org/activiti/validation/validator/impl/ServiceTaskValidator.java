@@ -29,10 +29,7 @@ public class ServiceTaskValidator extends ExternalInvocationTaskValidator {
     }
 
     protected void verifyImplementation(Process process, ServiceTask serviceTask, List<ValidationError> errors) {
-        System.out.println("[Validating service task. Verify Implementation: " + serviceTask.getImplementationType() + "]");
-
-        if (!"foo".equalsIgnoreCase(serviceTask.getImplementationType()) &&
-                !ImplementationType.IMPLEMENTATION_TYPE_CLASS.equalsIgnoreCase(serviceTask.getImplementationType())
+        if (!ImplementationType.IMPLEMENTATION_TYPE_CLASS.equalsIgnoreCase(serviceTask.getImplementationType())
                 && !ImplementationType.IMPLEMENTATION_TYPE_DELEGATEEXPRESSION.equalsIgnoreCase(serviceTask.getImplementationType())
                 && !ImplementationType.IMPLEMENTATION_TYPE_EXPRESSION.equalsIgnoreCase(serviceTask.getImplementationType())
                 && !ImplementationType.IMPLEMENTATION_TYPE_WEBSERVICE.equalsIgnoreCase(serviceTask.getImplementationType())

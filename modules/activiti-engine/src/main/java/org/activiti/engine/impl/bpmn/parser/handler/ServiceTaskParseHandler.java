@@ -44,11 +44,9 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
     }
 
     protected void executeParse(BpmnParse bpmnParse, ServiceTask serviceTask) {
-
         ActivityImpl activity = createActivityOnCurrentScope(bpmnParse, serviceTask, BpmnXMLConstants.ELEMENT_TASK_SERVICE);
         activity.setAsync(serviceTask.isAsynchronous());
         activity.setExclusive(!serviceTask.isNotExclusive());
-
 
         // Email, Mule and Shell service tasks
         if (StringUtils.isNotEmpty(serviceTask.getType())) {
@@ -69,13 +67,10 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
                 logger.warn("Invalid service task type: '" + serviceTask.getType() + "' " + " for service task " + serviceTask.getId());
             }
 
-
-            // activiti:foo
-        } else if ("foo".equalsIgnoreCase(serviceTask.getImplementationType())) {
-            System.out.println(serviceTask.getImplementation());
-            //activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createFooServiceTask(serviceTask, createTaskDefinition(bpmnParse, serviceTask)));
-
-            // activiti:class
+        }
+        // Check if it is a custom REST publish task
+        else if (serviceTask.getExtensionId().equals("de.fh.aachen.bpmn.designer.RestPublishTask")) {
+            activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createRestPublishTaskActivityBehavior(serviceTask, createTaskDefinition(bpmnParse, serviceTask)));
         } else if (ImplementationType.IMPLEMENTATION_TYPE_CLASS.equalsIgnoreCase(serviceTask.getImplementationType())) {
             activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createClassDelegateServiceTask(serviceTask));
 
@@ -121,35 +116,40 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
 
     }
 
-//    private TaskDefinition createTaskDefinition(BpmnParse bpmnParse, ServiceTask serviceTask) {
-//        TaskFormHandler taskFormHandler = new DefaultTaskFormHandler();
-//
-//        // Create mocked form properties
-//        List<FormProperty> mockedFormProps = new ArrayList<FormProperty>();
-//        FormProperty mockProperty = new FormProperty();
-//        mockProperty.setId("mock");
-//        mockProperty.setName("Sample mock property");
-//        mockProperty.setType("string");
-//        mockProperty.setRequired(true);
-//        mockProperty.setReadable(true);
-//        mockProperty.setWriteable(true);
-//        mockedFormProps.add(mockProperty);
-//
-//        // Set mocked form key (here: empty string for now)
-//        String mockedFormKey = "";
-//
-//        // retrieve process definitions from the current scope
-//        ProcessDefinitionEntity processDefinition = (ProcessDefinitionEntity) bpmnParse.getCurrentScope().getProcessDefinition();
-//        taskFormHandler.parseConfiguration(mockedFormProps, mockedFormKey, bpmnParse.getDeployment(), processDefinition);
-//        TaskDefinition taskDefinition = new TaskDefinition(taskFormHandler);
-//        taskDefinition.setKey(serviceTask.getId());
-//        processDefinition.getTaskDefinitions().put(serviceTask.getId(), taskDefinition);
-//        ExpressionManager expressionManager = bpmnParse.getExpressionManager();
-//
-//
-//
-//
-//        // ==================== //
+    private TaskDefinition createTaskDefinition(BpmnParse bpmnParse, ServiceTask serviceTask) {
+        TaskFormHandler taskFormHandler = new DefaultTaskFormHandler();
+
+        // Create mocked form properties
+        List<FormProperty> mockedFormProps = new ArrayList<FormProperty>();
+        FormProperty mockProperty = new FormProperty();
+        mockProperty.setId("mock");
+        mockProperty.setName("Sample mock property");
+        mockProperty.setType("string");
+        mockProperty.setRequired(true);
+        mockProperty.setReadable(true);
+        mockProperty.setWriteable(true);
+        mockedFormProps.add(mockProperty);
+
+        // Set mocked form key (here: empty string for now)
+        String mockedFormKey = "";
+
+        // retrieve process definitions from the current scope
+        ProcessDefinitionEntity processDefinition = (ProcessDefinitionEntity) bpmnParse.getCurrentScope().getProcessDefinition();
+        taskFormHandler.parseConfiguration(mockedFormProps, mockedFormKey, bpmnParse.getDeployment(), processDefinition);
+        TaskDefinition taskDefinition = new TaskDefinition(taskFormHandler);
+        taskDefinition.setKey(serviceTask.getId());
+        processDefinition.getTaskDefinitions().put(serviceTask.getId(), taskDefinition);
+        ExpressionManager expressionManager = bpmnParse.getExpressionManager();
+
+        // Mocking values for name, assignee etc.
+        taskDefinition.setNameExpression(expressionManager.createExpression("Publish Task"));
+        taskDefinition.setAssigneeExpression(expressionManager.createExpression("kermit"));
+
+        return taskDefinition;
+    }
+
+
+    // ==================== //
 //
 //        taskFormHandler.parseConfiguration(userTask.getFormProperties(), userTask.getFormKey(), bpmnParse.getDeployment(), processDefinition);
 //
@@ -201,6 +201,6 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
 //        if (StringUtils.isNotEmpty(userTask.getPriority())) {
 //            taskDefinition.setPriorityExpression(expressionManager.createExpression(userTask.getPriority()));
 //        }
-//    }
+
 }
 

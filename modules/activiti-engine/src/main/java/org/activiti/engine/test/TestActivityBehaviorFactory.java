@@ -44,7 +44,6 @@ import org.activiti.bpmn.model.ThrowEvent;
 import org.activiti.bpmn.model.Transaction;
 import org.activiti.bpmn.model.UserTask;
 import org.activiti.engine.delegate.Expression;
-import org.activiti.engine.impl.bpmn.behavior.FooActivityBehavior;
 import org.activiti.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
 import org.activiti.engine.impl.bpmn.behavior.BoundaryEventActivityBehavior;
 import org.activiti.engine.impl.bpmn.behavior.BusinessRuleTaskActivityBehavior;
@@ -79,7 +78,6 @@ import org.activiti.engine.impl.bpmn.behavior.TransactionActivityBehavior;
 import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.activiti.engine.impl.bpmn.behavior.WebServiceActivityBehavior;
 import org.activiti.engine.impl.bpmn.helper.ClassDelegate;
-import org.activiti.engine.impl.bpmn.parser.BpmnParse;
 import org.activiti.engine.impl.bpmn.parser.CompensateEventDefinition;
 import org.activiti.engine.impl.bpmn.parser.EventSubscriptionDeclaration;
 import org.activiti.engine.impl.bpmn.parser.FieldDeclaration;
@@ -156,11 +154,11 @@ public class TestActivityBehaviorFactory extends AbstractBehaviorFactory impleme
 	}
 
     @Override
-    public FooActivityBehavior createFooServiceTask(ServiceTask serviceTask, TaskDefinition taskDefinition) {
+    public ActivityBehavior createRestPublishTaskActivityBehavior(ServiceTask serviceTask, TaskDefinition taskDefinition) {
         return null;
     }
 
-	@Override
+    @Override
 	public ClassDelegate createClassDelegateServiceTask(ServiceTask serviceTask) {
 		
 		if (allServiceTasksNoOp 
