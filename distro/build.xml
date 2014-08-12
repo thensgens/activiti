@@ -92,6 +92,9 @@
 			<fileset dir="../modules/activiti-rest/target">
 				<include name="activiti-rest-*.jar" />
 			</fileset>
+            <fileset dir="../modules/activiti-bpmn4rest/target">
+                <include name="activiti-bpmn4rest-*.jar" />
+            </fileset>
 			<fileset dir="../modules/activiti-camel/target">
 				<include name="activiti-camel-*.jar" />
 			</fileset>
@@ -120,20 +123,28 @@
 			<fileset dir="../modules/activiti-webapp-rest2/target">
 				<include name="activiti-webapp-rest*.war" />
 			</fileset>
+            <fileset dir="../modules/activiti-webapp-bpmn4rest2/target">
+                <include name="activiti-webapp-bpmn4rest*.war" />
+            </fileset>
+
 		</copy>
 		<move file="${target.distro.root}/wars/activiti-webapp-explorer2-${activiti.version}.war" tofile="${target.distro.root}/wars/activiti-explorer.war"/>
 
 		<move file="${target.distro.root}/wars/activiti-webapp-rest2-${activiti.version}.war" tofile="${target.distro.root}/wars/activiti-rest.war"/>
-	</target>
+
+        <move file="${target.distro.root}/wars/activiti-webapp-bpmn4rest2-${activiti.version}.war" tofile="${target.distro.root}/wars/activiti-bpmn4rest.war"/>
+    </target>
 	
 	<target name="deploy.tomcat">
 		<copy file="${target.distro.root}/wars/activiti-explorer.war" todir="/home/user/Software/apache-tomcat-7.0.32/webapps"/>
-		<copy file="${target.distro.root}/wars/activiti-rest.war" todir="/home/user/Software/apache-tomcat-7.0.32/webapps"/>
+        <copy file="${target.distro.root}/wars/activiti-rest.war" todir="/home/user/Software/apache-tomcat-7.0.32/webapps"/>
+        <copy file="${target.distro.root}/wars/activiti-bpmn4rest.war" todir="/home/user/Software/apache-tomcat-7.0.32/webapps"/>
 	</target>
 
 	<target name="remove.old.deployments">
 	  <delete dir="/home/user/Software/apache-tomcat-7.0.32/webapps/activiti-explorer"/>
-	  <delete dir="/home/user/Software/apache-tomcat-7.0.32/webapps/activiti-rest"/>
+        <delete dir="/home/user/Software/apache-tomcat-7.0.32/webapps/activiti-rest"/>
+        <delete dir="/home/user/Software/apache-tomcat-7.0.32/webapps/activiti-bpmn4rest"/>
 	</target>
 
 	<target name="build.docs" unless="nodocs">

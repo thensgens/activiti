@@ -71,6 +71,8 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
         // Check if it is a custom REST publish task
         else if (serviceTask.getExtensionId().equals("de.fh.aachen.bpmn.designer.RestPublishTask")) {
             activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createRestPublishTaskActivityBehavior(serviceTask, createTaskDefinition(bpmnParse, serviceTask)));
+
+            // activiti:class
         } else if (ImplementationType.IMPLEMENTATION_TYPE_CLASS.equalsIgnoreCase(serviceTask.getImplementationType())) {
             activity.setActivityBehavior(bpmnParse.getActivityBehaviorFactory().createClassDelegateServiceTask(serviceTask));
 
