@@ -1,0 +1,34 @@
+BPMN4REST principles summary:
+
+
+1) 	Modeling External Resources
+	=> Intra process instances communication possible
+	=> Model resource (container) that can be accessed via REST requests
+	here: 	Not the endpoint (container) is implemented, but rather the client itself.
+			A new 'REST Consumer task' has been added for that purpose.
+
+
+2) 	Publishing Process Elements as Resources
+	=> only inter-process instace communication is allowed
+	=> Process elements are: Processes (definitions as well as instances), tasks and subprocesses
+
+	a) 	Processes:
+		URI: /{process}				 	(process definitions)
+			x) 	POST requests should start an instance for the specified process definition. The result should 
+				indicate the location URI for this instance (POST-REDIRECT-GET pattern)
+				
+		URI: /{process}/{instance} 		(process instances)
+			x) 	GET requests should return the current status of the process instance.
+				Depending on the media types, the request should return links to individual tasks that have been
+				published as a resource.
+				Maybe further filtering is required/needed (e.g. only list active tasks, ...)
+			x) 	DELETE requests should shut the process instance down (and all related tasks)
+
+	b) 	Tasks:							(all bpmn related and custom tasks, here: maybe only user tasks are applicable)
+		URI: /{process}/{instance}/{task}
+			x) 	GET requests should return task-specific information (e.g. its state, its input/output params)
+			x) 	PUT requests should be able to change the state of a task and set the value of output params
+
+
+3) 	Modeling Internal Resources: The Resource Request Event
+	=> tbd
