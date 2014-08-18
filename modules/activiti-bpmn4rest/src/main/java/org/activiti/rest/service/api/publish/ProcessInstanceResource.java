@@ -11,13 +11,7 @@
  * limitations under the License.
  */
 
-package org.activiti.rest.service.api.poc;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipInputStream;
+package org.activiti.rest.service.api.publish;
 
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
@@ -25,10 +19,10 @@ import org.activiti.engine.impl.DeploymentQueryProperty;
 import org.activiti.engine.query.QueryProperty;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.DeploymentBuilder;
-import org.activiti.engine.repository.ProcessDefinition;
-import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.rest.common.api.ActivitiUtil;
 import org.activiti.rest.common.api.SecuredResource;
+import org.activiti.rest.service.api.repository.DeploymentResponse;
+import org.activiti.rest.service.api.runtime.process.ProcessInstanceResponse;
 import org.activiti.rest.service.application.ActivitiRestServicesApplication;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -38,12 +32,16 @@ import org.restlet.ext.fileupload.RestletFileUpload;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
-import org.activiti.rest.service.api.repository.DeploymentResponse;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipInputStream;
 
 /**
  * @author Torben Hensgens
  */
-public class ProcessResource extends SecuredResource {
+public class ProcessInstanceResource extends SecuredResource {
 
     protected static final String DEPRECATED_API_DEPLOYMENT_SEGMENT = "deployment";
 
@@ -57,21 +55,8 @@ public class ProcessResource extends SecuredResource {
     }
 
     @Get
-    public List<ProcessResponse> getProcessDefinitions() {
-        ProcessDefinitionQuery processDefinitionQuery = ActivitiUtil.getRepositoryService().createProcessDefinitionQuery();
-        String process = getAttribute("process");
-        processDefinitionQuery.processDefinitionKey(process);
-        List<ProcessResponse> responseList = new ArrayList<ProcessResponse>();
-        for (ProcessDefinition definition : processDefinitionQuery.list()) {
-            responseList.add(new ProcessResponse(definition.getId(), definition.getName(), definition.getKey(),
-                    definition.getCategory(), definition.getDescription(), definition.getVersion(),
-                    definition.getDeploymentId(), definition.isSuspended()));
-        }
-
-        // TODO: add 'processDefinitionKeyLike' query if the 'processDefinitionKey' doesn't return anything
-        // ...
-
-        return responseList;
+    public ProcessInstanceResponse getCustomResponse() {
+        return null;
     }
 
     @Post
@@ -135,59 +120,4 @@ public class ProcessResource extends SecuredResource {
             throw new ActivitiException(e.getMessage(), e);
         }
     }
-
-    class ProcessResponse {
-        String mId;
-        String mName;
-        String mKey;
-        String mCategory;
-        String mDescription;
-        int mVersion;
-        String mDeploymentId;
-        boolean mIsSuspended;
-
-        public String getmId() {
-            return mId;
-        }
-
-        public String getmName() {
-            return mName;
-        }
-
-        public String getmKey() {
-            return mKey;
-        }
-
-        public String getmCategory() {
-            return mCategory;
-        }
-
-        public String getmDescription() {
-            return mDescription;
-        }
-
-        public int getmVersion() {
-            return mVersion;
-        }
-
-        public String getmDeploymentId() {
-            return mDeploymentId;
-        }
-
-        public boolean ismIsSuspended() {
-            return mIsSuspended;
-        }
-
-        ProcessResponse(String mId, String mName, String mKey, String mCategory, String mDescription, int mVersion, String mDeploymentId, boolean mIsSuspended) {
-            this.mId = mId;
-            this.mName = mName;
-            this.mKey = mKey;
-            this.mCategory = mCategory;
-            this.mDescription = mDescription;
-            this.mVersion = mVersion;
-            this.mDeploymentId = mDeploymentId;
-            this.mIsSuspended = mIsSuspended;
-        }
-    }
-
 }

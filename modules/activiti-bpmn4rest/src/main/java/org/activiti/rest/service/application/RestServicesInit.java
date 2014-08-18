@@ -84,7 +84,6 @@ import org.activiti.rest.service.api.management.TableCollectionResource;
 import org.activiti.rest.service.api.management.TableColumnsResource;
 import org.activiti.rest.service.api.management.TableDataResource;
 import org.activiti.rest.service.api.management.TableResource;
-import org.activiti.rest.service.api.poc.ProcessResource;
 import org.activiti.rest.service.api.repository.DeploymentCollectionResource;
 import org.activiti.rest.service.api.repository.DeploymentResource;
 import org.activiti.rest.service.api.repository.DeploymentResourceCollectionResource;

@@ -16,6 +16,8 @@ BPMN4REST principles summary:
 		URI: /{process}				 	(process definitions)
 			x) 	POST requests should start an instance for the specified process definition. The result should 
 				indicate the location URI for this instance (POST-REDIRECT-GET pattern)
+
+			x) GET requests could list additional information about the process definition (required?)
 				
 		URI: /{process}/{instance} 		(process instances)
 			x) 	GET requests should return the current status of the process instance.

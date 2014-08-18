@@ -11,7 +11,13 @@
  * limitations under the License.
  */
 
-package org.activiti.rest.service.api.poc;
+package org.activiti.rest.service.api.publish;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipInputStream;
 
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
@@ -19,9 +25,11 @@ import org.activiti.engine.impl.DeploymentQueryProperty;
 import org.activiti.engine.query.QueryProperty;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.DeploymentBuilder;
+import org.activiti.engine.repository.ProcessDefinition;
+import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.rest.common.api.ActivitiUtil;
 import org.activiti.rest.common.api.SecuredResource;
-import org.activiti.rest.service.api.repository.DeploymentResponse;
+import org.activiti.rest.service.api.repository.ProcessDefinitionResponse;
 import org.activiti.rest.service.application.ActivitiRestServicesApplication;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -31,16 +39,12 @@ import org.restlet.ext.fileupload.RestletFileUpload;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipInputStream;
+import org.activiti.rest.service.api.repository.DeploymentResponse;
 
 /**
  * @author Torben Hensgens
  */
-public class ProcessInstanceResource extends SecuredResource {
+public class ProcessResource extends SecuredResource {
 
     protected static final String DEPRECATED_API_DEPLOYMENT_SEGMENT = "deployment";
 
@@ -54,9 +58,28 @@ public class ProcessInstanceResource extends SecuredResource {
     }
 
     @Get
-    public ProcessInstanceResponse getCustomResponse() {
-        return new ProcessInstanceResponse(getRequest().getHostRef().getPath(), getRequest().getMethod().getName(),
-                getRequest().getRootRef().getPath(), getRequest().getResourceRef().getPath(), getAttribute("process") + getAttribute("instance"));
+    public List<ProcessDefinitionResponse> getProcessDefinitions() {
+        ProcessDefinitionQuery processDefinitionQuery = ActivitiUtil.getRepositoryService().createProcessDefinitionQuery();
+        String process = getAttribute("process");
+        processDefinitionQuery.processDefinitionKey(process);
+
+        List<ProcessDefinitionResponse> responseList = new ArrayList<ProcessDefinitionResponse>();
+        for (ProcessDefinition definition : processDefinitionQuery.list()) {
+            ProcessDefinitionResponse responseEntry = new ProcessDefinitionResponse();
+            responseEntry.setId(definition.getId());
+            responseEntry.setName(definition.getName());
+            responseEntry.setKey(definition.getKey());
+            responseEntry.setCategory(definition.getCategory());
+            responseEntry.setDeploymentId(definition.getDeploymentId());
+            responseEntry.setVersion(definition.getVersion());
+            responseEntry.setDeploymentId(definition.getDeploymentId());
+            responseEntry.setSuspended(definition.isSuspended());
+            responseList.add(responseEntry);
+        }
+
+        // TODO: fallback to 'processDefinitionKeyLike' query if the 'processDefinitionKey' doesn't return anything
+        // ...
+        return responseList;
     }
 
     @Post
@@ -120,41 +143,4 @@ public class ProcessInstanceResource extends SecuredResource {
             throw new ActivitiException(e.getMessage(), e);
         }
     }
-
-    class ProcessInstanceResponse {
-        String mHostRef;
-        String mMethod;
-        String mRootRef;
-        String mResourceRef;
-        String mRefAttribute;
-
-        public String getmHostRef() {
-            return mHostRef;
-        }
-
-        public String getmMethod() {
-            return mMethod;
-        }
-
-        public String getmRootRef() {
-            return mRootRef;
-        }
-
-        public String getmResourceRef() {
-            return mResourceRef;
-        }
-
-        public String getmRefAttribute() {
-            return mRefAttribute;
-        }
-
-        public ProcessInstanceResponse(String host, String method, String rootRef, String resourceRef, String attr) {
-            mHostRef = host;
-            mMethod = method;
-            mRootRef = rootRef;
-            mResourceRef = resourceRef;
-            mRefAttribute = attr;
-        }
-    }
-
 }

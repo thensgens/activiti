@@ -398,21 +398,41 @@ public class RestResponseFactory {
     }
     return result ;
   }
-  
+
+    public ProcessInstanceResponse createProcessInstanceResponse(SecuredResource securedResource, ProcessInstance processInstance) {
+        ProcessInstanceResponse result = new ProcessInstanceResponse();
+        result.setActivityId(processInstance.getActivityId());
+        result.setBusinessKey(processInstance.getBusinessKey());
+        result.setId(processInstance.getId());
+        result.setProcessDefinitionId(processInstance.getProcessDefinitionId());
+        result.setProcessDefinitionUrl(securedResource.createFullResourceUrl(RestUrls.URL_PROCESS_DEFINITION, processInstance.getProcessDefinitionId()));
+        result.setSuspended(processInstance.isSuspended());
+        result.setUrl(securedResource.createFullResourceUrl(RestUrls.URL_PROCESS_INSTANCE, processInstance.getId()));
+        result.setTenantId(processInstance.getTenantId());
+        if (processInstance.getProcessVariables() != null) {
+            Map<String, Object> variableMap = processInstance.getProcessVariables();
+            for (String name : variableMap.keySet()) {
+                result.addVariable(createRestVariable(securedResource, name, variableMap.get(name),
+                        RestVariableScope.LOCAL, processInstance.getId(), VARIABLE_PROCESS, false));
+            }
+        }
+        return result;
+    }
+
   public AttachmentResponse createAttachmentResponse(SecuredResource securedResource, Attachment attachment) {
     AttachmentResponse result = new AttachmentResponse();
     result.setId(attachment.getId());
     result.setName(attachment.getName());
     result.setDescription(attachment.getDescription());
     result.setType(attachment.getType());
-    
+
     if(attachment.getUrl() == null && attachment.getTaskId() != null) {
       // Attachment content can be streamed
       result.setContentUrl(securedResource.createFullResourceUrl(RestUrls.URL_TASK_ATTACHMENT_DATA, attachment.getTaskId(), attachment.getId()));
     } else {
       result.setExternalUrl(attachment.getUrl());
     }
-    
+
     if(attachment.getTaskId() != null) {
       result.setUrl(securedResource.createFullResourceUrl(RestUrls.URL_TASK_ATTACHMENT, attachment.getTaskId(), attachment.getId()));
       result.setTaskUrl(securedResource.createFullResourceUrl(RestUrls.URL_TASK, attachment.getTaskId()));
@@ -422,27 +442,7 @@ public class RestResponseFactory {
     }
     return result ;
   }
-  
-  public ProcessInstanceResponse createProcessInstanceResponse(SecuredResource securedResource, ProcessInstance processInstance) {
-    ProcessInstanceResponse result = new ProcessInstanceResponse();
-    result.setActivityId(processInstance.getActivityId());
-    result.setBusinessKey(processInstance.getBusinessKey());
-    result.setId(processInstance.getId());
-    result.setProcessDefinitionId(processInstance.getProcessDefinitionId());
-    result.setProcessDefinitionUrl(securedResource.createFullResourceUrl(RestUrls.URL_PROCESS_DEFINITION, processInstance.getProcessDefinitionId()));
-    result.setSuspended(processInstance.isSuspended());
-    result.setUrl(securedResource.createFullResourceUrl(RestUrls.URL_PROCESS_INSTANCE, processInstance.getId()));
-    result.setTenantId(processInstance.getTenantId());
-    if (processInstance.getProcessVariables() != null) {
-      Map<String, Object> variableMap = processInstance.getProcessVariables();
-      for (String name : variableMap.keySet()) {
-        result.addVariable(createRestVariable(securedResource, name, variableMap.get(name), 
-            RestVariableScope.LOCAL, processInstance.getId(), VARIABLE_PROCESS, false));
-      }
-    }
-    return result;
-  }
-  
+
   
   public ExecutionResponse createExecutionResponse(SecuredResource securedResource, Execution execution) {
     ExecutionResponse result = new ExecutionResponse();

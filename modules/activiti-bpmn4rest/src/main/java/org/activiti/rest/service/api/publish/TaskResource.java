@@ -11,7 +11,7 @@
  * limitations under the License.
  */
 
-package org.activiti.rest.service.api.poc;
+package org.activiti.rest.service.api.publish;
 
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
@@ -22,6 +22,7 @@ import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.rest.common.api.ActivitiUtil;
 import org.activiti.rest.common.api.SecuredResource;
 import org.activiti.rest.service.api.repository.DeploymentResponse;
+import org.activiti.rest.service.api.runtime.task.TaskResponse;
 import org.activiti.rest.service.application.ActivitiRestServicesApplication;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -55,9 +56,7 @@ public class TaskResource extends SecuredResource {
 
     @Get
     public TaskResponse getCustomResponse() {
-        return new TaskResponse(getRequest().getHostRef().getPath(), getRequest().getMethod().getName(),
-                getRequest().getRootRef().getPath(), getRequest().getResourceRef().getPath(), getAttribute("process")
-                + getAttribute("instance") + getAttribute("task"));
+        return null;
     }
 
     @Post
@@ -121,41 +120,4 @@ public class TaskResource extends SecuredResource {
             throw new ActivitiException(e.getMessage(), e);
         }
     }
-
-    class TaskResponse {
-        String mHostRef;
-        String mMethod;
-        String mRootRef;
-        String mResourceRef;
-        String mRefAttribute;
-
-        public String getmHostRef() {
-            return mHostRef;
-        }
-
-        public String getmMethod() {
-            return mMethod;
-        }
-
-        public String getmRootRef() {
-            return mRootRef;
-        }
-
-        public String getmResourceRef() {
-            return mResourceRef;
-        }
-
-        public String getmRefAttribute() {
-            return mRefAttribute;
-        }
-
-        public TaskResponse(String host, String method, String rootRef, String resourceRef, String attr) {
-            mHostRef = host;
-            mMethod = method;
-            mRootRef = rootRef;
-            mResourceRef = resourceRef;
-            mRefAttribute = attr;
-        }
-    }
-
 }
