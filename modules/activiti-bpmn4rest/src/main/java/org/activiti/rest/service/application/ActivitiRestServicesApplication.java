@@ -15,11 +15,12 @@ package org.activiti.rest.service.application;
 
 import java.util.List;
 
-import org.activiti.rest.common.api.DefaultResource;
 import org.activiti.rest.common.application.ActivitiRestApplication;
 import org.activiti.rest.common.filter.JsonpFilter;
 import org.activiti.rest.service.api.RestResponseFactory;
-import org.activiti.rest.service.api.repository.DeploymentCollectionResource;
+import org.activiti.rest.service.api.poc.ProcessInstanceResource;
+import org.activiti.rest.service.api.poc.ProcessResource;
+import org.activiti.rest.service.api.poc.TaskResource;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.restlet.Restlet;
 import org.restlet.engine.Engine;
@@ -46,9 +47,9 @@ public class ActivitiRestServicesApplication extends ActivitiRestApplication {
         initializeAuthentication();
 
         Router router = new Router(getContext());
-        router.attach("/foo", DeploymentCollectionResource.class);
-        //router.attachDefault(DeploymentCollectionResource.class);
-        //router.attachDefault(DefaultResource.class);
+        router.attach("/{process}", ProcessResource.class);
+        router.attach("/{process}/{instance}", ProcessInstanceResource.class);
+        router.attach("/{process}/{instance}/{task}", TaskResource.class);
         //RestServicesInit.attachResources(router);
 
         JsonpFilter jsonpFilter = new JsonpFilter(getContext());

@@ -32,8 +32,6 @@ public class RestPublishTaskActivityBehavior extends TaskActivityBehavior {
     }
 
     public void execute(ActivityExecution execution) throws Exception {
-        System.out.println("Hello from RestPublishTaskActivityBehavior's execute method..");
-
         TaskEntity task = TaskEntity.createAndInsert(execution);
         task.setExecution(execution);
         task.setTaskDefinition(mTaskDefinition);

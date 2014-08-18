@@ -144,7 +144,7 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
         ExpressionManager expressionManager = bpmnParse.getExpressionManager();
 
         // Mocking values for name, assignee etc.
-        taskDefinition.setNameExpression(expressionManager.createExpression("Publish Task"));
+        taskDefinition.setNameExpression(expressionManager.createExpression(serviceTask.getName()));
         taskDefinition.setAssigneeExpression(expressionManager.createExpression("kermit"));
 
         return taskDefinition;
