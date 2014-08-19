@@ -59,8 +59,19 @@ public class ProcessInstanceResource extends SecuredResource {
 
     @Get
     public ProcessInstanceResponse getProcessInstanceStatus() {
-        // TODO: this method should return the process instance's corresponsing values.
-        return null;
+        String processInstanceId = getAttribute("instance");
+        if (processInstanceId == null) {
+            throw new ActivitiIllegalArgumentException("The processInstanceId cannot be null");
+        }
+
+        ProcessInstance processInstance = ActivitiUtil.getRuntimeService().createProcessInstanceQuery()
+                .processInstanceId(processInstanceId).singleResult();
+        if (processInstance == null) {
+            throw new ActivitiObjectNotFoundException("Could not find a process instance with id '" + processInstanceId + "'.", ProcessInstance.class);
+        }
+
+        return getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory()
+                .createProcessInstanceResponse(this, processInstance);
     }
 
     @Delete
