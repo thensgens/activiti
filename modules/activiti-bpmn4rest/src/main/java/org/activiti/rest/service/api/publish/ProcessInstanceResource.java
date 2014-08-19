@@ -15,10 +15,12 @@ package org.activiti.rest.service.api.publish;
 
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.impl.DeploymentQueryProperty;
 import org.activiti.engine.query.QueryProperty;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.DeploymentBuilder;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.rest.common.api.ActivitiUtil;
 import org.activiti.rest.common.api.SecuredResource;
 import org.activiti.rest.service.api.repository.DeploymentResponse;
@@ -62,5 +64,23 @@ public class ProcessInstanceResource extends SecuredResource {
     }
 
     @Delete
-    public
+    public void deleteProcessInstance() {
+        if(!authenticate()) {
+            return;
+        }
+        String processInstanceId = getAttribute("instance");
+        if (processInstanceId == null) {
+            throw new ActivitiIllegalArgumentException("The processInstanceId cannot be null");
+        }
+
+        ProcessInstance processInstance = ActivitiUtil.getRuntimeService().createProcessInstanceQuery()
+                .processInstanceId(processInstanceId).singleResult();
+        if (processInstance == null) {
+            throw new ActivitiObjectNotFoundException("Could not find a process instance with id '" + processInstanceId + "'.", ProcessInstance.class);
+        }
+        String deleteReason = getQueryParameter("deleteReason", getQuery());
+
+        ActivitiUtil.getRuntimeService().deleteProcessInstance(processInstance.getId(), deleteReason);
+        setStatus(Status.SUCCESS_NO_CONTENT);
+    }
 }

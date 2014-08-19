@@ -17,29 +17,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipInputStream;
 
-import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
+import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.impl.DeploymentQueryProperty;
 import org.activiti.engine.query.QueryProperty;
-import org.activiti.engine.repository.Deployment;
-import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
+import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.rest.common.api.ActivitiUtil;
 import org.activiti.rest.common.api.SecuredResource;
+import org.activiti.rest.service.api.RestResponseFactory;
+import org.activiti.rest.service.api.engine.variable.RestVariable;
 import org.activiti.rest.service.api.repository.ProcessDefinitionResponse;
+import org.activiti.rest.service.api.runtime.process.ProcessInstanceCreateRequest;
+import org.activiti.rest.service.api.runtime.process.ProcessInstanceResponse;
 import org.activiti.rest.service.application.ActivitiRestServicesApplication;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.ext.fileupload.RestletFileUpload;
-import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
-import org.activiti.rest.service.api.repository.DeploymentResponse;
 
 /**
  * @author Torben Hensgens
@@ -83,9 +79,72 @@ public class ProcessResource extends SecuredResource {
     }
 
     @Post
-    public DeploymentResponse uploadDeployment(Representation entity) {
-        // TODO: this method should actually start a new process instance and return its values
-        // (in order to accomplish the POST-REDIRECT-GET pattern).
-        return null;
+    public ProcessInstanceResponse createProcessInstance(ProcessInstanceCreateRequest request) {
+
+        if (!authenticate()) {
+            return null;
+        }
+
+        if (request.getProcessDefinitionId() == null && request.getProcessDefinitionKey() == null && request.getMessage() == null) {
+            throw new ActivitiIllegalArgumentException("Either processDefinitionId, processDefinitionKey or message is required.");
+        }
+
+        int paramsSet = ((request.getProcessDefinitionId() != null) ? 1 : 0)
+                + ((request.getProcessDefinitionKey() != null) ? 1 : 0)
+                + ((request.getMessage() != null) ? 1 : 0);
+
+        if (paramsSet > 1) {
+            throw new ActivitiIllegalArgumentException("Only one of processDefinitionId, processDefinitionKey or message should be set.");
+        }
+
+        if (request.isCustomTenantSet()) {
+            // Tenant-id can only be used with either key or message
+            if (request.getProcessDefinitionId() != null) {
+                throw new ActivitiIllegalArgumentException("TenantId can only be used with either processDefinitionKey or message.");
+            }
+        }
+
+        RestResponseFactory factory = getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory();
+
+        Map<String, Object> startVariables = null;
+        if (request.getVariables() != null) {
+            startVariables = new HashMap<String, Object>();
+            for (RestVariable variable : request.getVariables()) {
+                if (variable.getName() == null) {
+                    throw new ActivitiIllegalArgumentException("Variable name is required.");
+                }
+                startVariables.put(variable.getName(), factory.getVariableValue(variable));
+            }
+        }
+
+        // Actually start the instance based on key or id
+        try {
+            ProcessInstance instance = null;
+            if (request.getProcessDefinitionId() != null) {
+                instance = ActivitiUtil.getRuntimeService().startProcessInstanceById(
+                        request.getProcessDefinitionId(), request.getBusinessKey(), startVariables);
+            } else if (request.getProcessDefinitionKey() != null) {
+                if (request.isCustomTenantSet()) {
+                    instance = ActivitiUtil.getRuntimeService().startProcessInstanceByKeyAndTenantId(
+                            request.getProcessDefinitionKey(), request.getBusinessKey(), startVariables, request.getTenantId());
+                } else {
+                    instance = ActivitiUtil.getRuntimeService().startProcessInstanceByKey(
+                            request.getProcessDefinitionKey(), request.getBusinessKey(), startVariables);
+                }
+            } else {
+                if (request.isCustomTenantSet()) {
+                    instance = ActivitiUtil.getRuntimeService().startProcessInstanceByMessageAndTenantId(
+                            request.getMessage(), request.getBusinessKey(), startVariables, request.getTenantId());
+                } else {
+                    instance = ActivitiUtil.getRuntimeService().startProcessInstanceByMessage(
+                            request.getMessage(), request.getBusinessKey(), startVariables);
+                }
+            }
+
+            setStatus(Status.SUCCESS_CREATED);
+            return factory.createProcessInstanceResponse(this, instance);
+        } catch (ActivitiObjectNotFoundException e) {
+            throw new ActivitiIllegalArgumentException(e.getMessage(), e);
+        }
     }
 }
