@@ -58,7 +58,7 @@ public class ProcessInstanceResource extends SecuredResource {
     }
 
     @Get
-    public ProcessInstanceResponse getCustomResponse() {
+    public ProcessInstanceResponse getProcessInstanceStatus() {
         // TODO: this method should return the process instance's corresponsing values.
         return null;
     }

@@ -80,28 +80,8 @@ public class ProcessResource extends SecuredResource {
 
     @Post
     public ProcessInstanceResponse createProcessInstance(ProcessInstanceCreateRequest request) {
-
         if (!authenticate()) {
             return null;
-        }
-
-        if (request.getProcessDefinitionId() == null && request.getProcessDefinitionKey() == null && request.getMessage() == null) {
-            throw new ActivitiIllegalArgumentException("Either processDefinitionId, processDefinitionKey or message is required.");
-        }
-
-        int paramsSet = ((request.getProcessDefinitionId() != null) ? 1 : 0)
-                + ((request.getProcessDefinitionKey() != null) ? 1 : 0)
-                + ((request.getMessage() != null) ? 1 : 0);
-
-        if (paramsSet > 1) {
-            throw new ActivitiIllegalArgumentException("Only one of processDefinitionId, processDefinitionKey or message should be set.");
-        }
-
-        if (request.isCustomTenantSet()) {
-            // Tenant-id can only be used with either key or message
-            if (request.getProcessDefinitionId() != null) {
-                throw new ActivitiIllegalArgumentException("TenantId can only be used with either processDefinitionKey or message.");
-            }
         }
 
         RestResponseFactory factory = getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory();
@@ -117,30 +97,11 @@ public class ProcessResource extends SecuredResource {
             }
         }
 
-        // Actually start the instance based on key or id
+        // Actually start the instance based on process definition key (here: value for /{process})
         try {
             ProcessInstance instance = null;
-            if (request.getProcessDefinitionId() != null) {
-                instance = ActivitiUtil.getRuntimeService().startProcessInstanceById(
-                        request.getProcessDefinitionId(), request.getBusinessKey(), startVariables);
-            } else if (request.getProcessDefinitionKey() != null) {
-                if (request.isCustomTenantSet()) {
-                    instance = ActivitiUtil.getRuntimeService().startProcessInstanceByKeyAndTenantId(
-                            request.getProcessDefinitionKey(), request.getBusinessKey(), startVariables, request.getTenantId());
-                } else {
-                    instance = ActivitiUtil.getRuntimeService().startProcessInstanceByKey(
-                            request.getProcessDefinitionKey(), request.getBusinessKey(), startVariables);
-                }
-            } else {
-                if (request.isCustomTenantSet()) {
-                    instance = ActivitiUtil.getRuntimeService().startProcessInstanceByMessageAndTenantId(
-                            request.getMessage(), request.getBusinessKey(), startVariables, request.getTenantId());
-                } else {
-                    instance = ActivitiUtil.getRuntimeService().startProcessInstanceByMessage(
-                            request.getMessage(), request.getBusinessKey(), startVariables);
-                }
-            }
-
+            instance = ActivitiUtil.getRuntimeService().startProcessInstanceByKey(
+                    getAttribute("process"), request.getBusinessKey(), startVariables);
             setStatus(Status.SUCCESS_CREATED);
             return factory.createProcessInstanceResponse(this, instance);
         } catch (ActivitiObjectNotFoundException e) {
