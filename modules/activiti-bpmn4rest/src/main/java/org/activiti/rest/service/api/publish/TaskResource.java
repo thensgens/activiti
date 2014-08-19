@@ -13,38 +13,29 @@
 
 package org.activiti.rest.service.api.publish;
 
-import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.impl.DeploymentQueryProperty;
 import org.activiti.engine.query.QueryProperty;
-import org.activiti.engine.repository.Deployment;
-import org.activiti.engine.repository.DeploymentBuilder;
 import org.activiti.engine.task.Task;
 import org.activiti.rest.common.api.ActivitiUtil;
-import org.activiti.rest.common.api.SecuredResource;
-import org.activiti.rest.service.api.repository.DeploymentResponse;
+import org.activiti.rest.service.api.engine.variable.RestVariable;
+import org.activiti.rest.service.api.runtime.task.TaskActionRequest;
+import org.activiti.rest.service.api.runtime.task.TaskBaseRestResource;
 import org.activiti.rest.service.api.runtime.task.TaskResponse;
 import org.activiti.rest.service.application.ActivitiRestServicesApplication;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.restlet.data.MediaType;
 import org.restlet.data.Status;
-import org.restlet.ext.fileupload.RestletFileUpload;
-import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
-import org.restlet.resource.Post;
 import org.restlet.resource.Put;
+import org.restlet.resource.ResourceException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipInputStream;
 
 /**
  * @author Torben Hensgens
  */
-public class TaskResource extends SecuredResource {
+public class TaskResource extends TaskBaseRestResource {
 
     protected static final String DEPRECATED_API_DEPLOYMENT_SEGMENT = "deployment";
 
@@ -82,10 +73,66 @@ public class TaskResource extends SecuredResource {
                 .createTaskResponse(this, requestedTask);
     }
 
-//    @Put
-//    public DeploymentResponse updateTask(Representation entity) {
-//        if (!authenticate()) {
-//            return null;
-//        }
-//    }
+    @Put
+    public void updateTaskState(TaskActionRequest actionRequest) {
+        if (!authenticate()) {
+            return;
+        }
+
+        if (actionRequest == null) {
+            throw new ResourceException(new Status(Status.CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE.getCode(),
+                    "A request body was expected when executing a task action.",
+                    null, null));
+        }
+
+        Task task = getTaskFromRequest();
+        if (TaskActionRequest.ACTION_COMPLETE.equals(actionRequest.getAction())) {
+            completeTask(task, actionRequest);
+        } else if (TaskActionRequest.ACTION_CLAIM.equals(actionRequest.getAction())) {
+            claimTask(task, actionRequest);
+        } else if (TaskActionRequest.ACTION_DELEGATE.equals(actionRequest.getAction())) {
+            delegateTask(task, actionRequest);
+        } else if (TaskActionRequest.ACTION_RESOLVE.equals(actionRequest.getAction())) {
+            resolveTask(task, actionRequest);
+        } else {
+            throw new ActivitiIllegalArgumentException("Invalid action: '" + actionRequest.getAction() + "'.");
+        }
+    }
+
+    protected void completeTask(Task task, TaskActionRequest actionRequest) {
+        if (actionRequest.getVariables() != null) {
+            Map<String, Object> variablesToSet = new HashMap<String, Object>();
+            for (RestVariable var : actionRequest.getVariables()) {
+                if (var.getName() == null) {
+                    throw new ActivitiIllegalArgumentException("Variable name is required");
+                }
+
+                Object actualVariableValue = getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory()
+                        .getVariableValue(var);
+
+                variablesToSet.put(var.getName(), actualVariableValue);
+            }
+
+            ActivitiUtil.getTaskService().complete(task.getId(), variablesToSet);
+        } else {
+            ActivitiUtil.getTaskService().complete(task.getId());
+        }
+    }
+
+    protected void resolveTask(Task task, TaskActionRequest actionRequest) {
+        ActivitiUtil.getTaskService().resolveTask(task.getId());
+    }
+
+    protected void delegateTask(Task task, TaskActionRequest actionRequest) {
+        if (actionRequest.getAssignee() == null) {
+            throw new ActivitiIllegalArgumentException("An assignee is required when delegating a task.");
+        }
+        ActivitiUtil.getTaskService().delegateTask(task.getId(), actionRequest.getAssignee());
+    }
+
+    protected void claimTask(Task task, TaskActionRequest actionRequest) {
+        // In case the task is already claimed, a ActivitiTaskAlreadyClaimedException is thown and converted to
+        // a CONFLICT response by the StatusService
+        ActivitiUtil.getTaskService().claim(task.getId(), actionRequest.getAssignee());
+    }
 }
