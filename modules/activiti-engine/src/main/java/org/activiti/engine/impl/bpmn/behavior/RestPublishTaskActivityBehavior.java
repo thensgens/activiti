@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by thens on 8/9/14.
+ * @author Torben Hensgens
  */
 public class RestPublishTaskActivityBehavior extends TaskActivityBehavior {
 

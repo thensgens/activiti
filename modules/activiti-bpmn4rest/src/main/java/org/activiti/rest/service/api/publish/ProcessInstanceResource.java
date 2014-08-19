@@ -30,6 +30,7 @@ import org.restlet.data.MediaType;
 import org.restlet.data.Status;
 import org.restlet.ext.fileupload.RestletFileUpload;
 import org.restlet.representation.Representation;
+import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 
@@ -56,68 +57,10 @@ public class ProcessInstanceResource extends SecuredResource {
 
     @Get
     public ProcessInstanceResponse getCustomResponse() {
+        // TODO: this method should return the process instance's corresponsing values.
         return null;
     }
 
-    @Post
-    public DeploymentResponse uploadDeployment(Representation entity) {
-        if (!authenticate()) {
-            return null;
-        }
-
-        try {
-
-            if (entity == null || entity.getMediaType() == null || !MediaType.MULTIPART_FORM_DATA.isCompatible(entity.getMediaType())) {
-                throw new ActivitiIllegalArgumentException("The request should be of type" + MediaType.MULTIPART_FORM_DATA + ".");
-            }
-
-            RestletFileUpload upload = new RestletFileUpload(new DiskFileItemFactory());
-            List<FileItem> items = upload.parseRepresentation(entity);
-
-            String tenantId = null;
-
-            FileItem uploadItem = null;
-            for (FileItem fileItem : items) {
-                if (fileItem.isFormField()) {
-                    if ("tenantId".equals(fileItem.getFieldName())) {
-                        tenantId = fileItem.getString("UTF-8");
-                    }
-                } else if (fileItem.getName() != null) {
-                    uploadItem = fileItem;
-                }
-            }
-
-            if (uploadItem == null) {
-                throw new ActivitiIllegalArgumentException("No file content was found in request body.");
-            }
-
-            DeploymentBuilder deploymentBuilder = ActivitiUtil.getRepositoryService().createDeployment();
-            String fileName = uploadItem.getName();
-            if (fileName.endsWith(".bpmn20.xml") || fileName.endsWith(".bpmn")) {
-                deploymentBuilder.addInputStream(fileName, uploadItem.getInputStream());
-            } else if (fileName.toLowerCase().endsWith(".bar") || fileName.toLowerCase().endsWith(".zip")) {
-                deploymentBuilder.addZipInputStream(new ZipInputStream(uploadItem.getInputStream()));
-            } else {
-                throw new ActivitiIllegalArgumentException("File must be of type .bpmn20.xml, .bpmn, .bar or .zip");
-            }
-            deploymentBuilder.name(fileName);
-
-            if (tenantId != null) {
-                deploymentBuilder.tenantId(tenantId);
-            }
-
-            Deployment deployment = deploymentBuilder.deploy();
-
-            setStatus(Status.SUCCESS_CREATED);
-
-            return getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory()
-                    .createDeploymentResponse(this, deployment);
-
-        } catch (Exception e) {
-            if (e instanceof ActivitiException) {
-                throw (ActivitiException) e;
-            }
-            throw new ActivitiException(e.getMessage(), e);
-        }
-    }
+    @Delete
+    public
 }
