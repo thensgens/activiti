@@ -4,8 +4,8 @@ BPMN4REST principles summary:
 1) 	Modeling External Resources
 	=> Intra process instances communication possible
 	=> Model resource (container) that can be accessed via REST requests
-	here: 	Not the endpoint (container) is implemented, but rather the client itself.
-			A new 'REST Consumer task' has been added for that purpose.
+	here: 	Not the endpoint (container) is implemented, but rather the client (task) itself.
+			A new 'REST Consumer task' has been added for exactly that purpose.
 
 
 2) 	Publishing Process Elements as Resources

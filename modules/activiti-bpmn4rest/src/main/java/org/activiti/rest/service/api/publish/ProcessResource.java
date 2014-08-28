@@ -26,6 +26,7 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.rest.common.api.ActivitiUtil;
+import org.activiti.rest.common.api.DataResponse;
 import org.activiti.rest.common.api.SecuredResource;
 import org.activiti.rest.service.api.RestResponseFactory;
 import org.activiti.rest.service.api.engine.variable.RestVariable;
@@ -54,7 +55,7 @@ public class ProcessResource extends SecuredResource {
     }
 
     @Get
-    public List<ProcessDefinitionResponse> getProcessDefinitions() {
+    public DataResponse getProcessDefinitions() {
         ProcessDefinitionQuery processDefinitionQuery = ActivitiUtil.getRepositoryService().createProcessDefinitionQuery();
         String process = getAttribute("process");
         processDefinitionQuery.processDefinitionKey(process);
@@ -75,7 +76,15 @@ public class ProcessResource extends SecuredResource {
 
         // TODO: fallback to 'processDefinitionKeyLike' query if the 'processDefinitionKey' doesn't return anything
         // ...
-        return responseList;
+
+        DataResponse response = new DataResponse();
+        response.setStart(0);
+        response.setSize(responseList.size());
+        response.setSort("name");
+        response.setOrder("asc");
+        response.setTotal(responseList.size());
+        response.setData(responseList);
+        return response;
     }
 
     @Post

@@ -18,13 +18,18 @@
 
 Notes/Problems:
 
-(1) Still unknown how these user tasks could be emulated/implemented. Possibilities:
+[SOLVED] (1) Still unknown how these user tasks could be emulated/implemented. Possibilities:
 	- extend/change the deployer (deployer will behave differently if it encounters certain indicators,
 	  e.g. manually replacing service tasks with user tasks in the corresponding xml file)
 
-(2) [SOVLED] Error 415 while trying to use the REST User Task API (e.g. completing a task)
+[SOLVED] (2) Error 415 while trying to use the REST User Task API (e.g. completing a task)
 	=> make sure that the client actually uses 'Content-Type: application-json' (!)
 
-(3) - Idea for 2): See 'UserTaskParseHandler' and 'ServiceTaskParseHandler' for reference. Adjust the user task process
+[SOLVED] (3) - Idea for 2): See 'UserTaskParseHandler' and 'ServiceTaskParseHandler' for reference. Adjust the user task process
     to the service tasks.
     - maybe clone/create execution when process flow hits the custom task (in order to emulate a user task afterwards)
+
+(4) REST publish tasks are not being treated differently from (regular) user tasks (both task types can be queried via REST equally)
+    Quick'n'Dirty: REST publish tasks ids have to start with a predefined prefix, e.g. 'rest_pub_*'
+    (!) Same goes for REST processes; these cannot be flagged properly due to editor limitations.
+    Idea: Convention for both REST tasks and processes (e.g. name has to start with a specific prefix)
