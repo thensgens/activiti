@@ -13,9 +13,11 @@
 
 package org.activiti.rest.service.api.publish;
 
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.impl.DeploymentQueryProperty;
+import org.activiti.engine.impl.bpmn.behavior.RestPublishTaskActivityBehavior;
 import org.activiti.engine.query.QueryProperty;
 import org.activiti.engine.task.Task;
 import org.activiti.rest.common.api.ActivitiUtil;
@@ -62,15 +64,19 @@ public class TaskResource extends TaskBaseRestResource {
             throw new ActivitiIllegalArgumentException("The task identifier cannot be null");
         }
 
-        // TODO: differentiate between regular user task and REST publish tasks (!)
-        Task requestedTask = ActivitiUtil.getTaskService().createTaskQuery().processDefinitionKey(processName)
-                .processInstanceId(instanceName).taskDefinitionKey(taskName).singleResult();
-        if (requestedTask == null) {
-            throw new ActivitiObjectNotFoundException("Could not find a task with id '" + taskName + "'.", Task.class);
+        if (processName.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)
+                && taskName.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
+            Task requestedTask = ActivitiUtil.getTaskService().createTaskQuery().processDefinitionKey(processName)
+                    .processInstanceId(instanceName).taskDefinitionKey(taskName).singleResult();
+            if (requestedTask == null) {
+                throw new ActivitiObjectNotFoundException("Could not find a task with id '" + taskName + "'.", Task.class);
+            }
+            return getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory()
+                    .createTaskResponse(this, requestedTask);
+        } else {
+            setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+            throw new ActivitiException("REST publish tasks have to start with the common prefix 'rest_'.");
         }
-
-        return getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory()
-                .createTaskResponse(this, requestedTask);
     }
 
     @Put
@@ -86,16 +92,18 @@ public class TaskResource extends TaskBaseRestResource {
         }
 
         Task task = getTaskFromRequest();
-        if (TaskActionRequest.ACTION_COMPLETE.equals(actionRequest.getAction())) {
-            completeTask(task, actionRequest);
-        } else if (TaskActionRequest.ACTION_CLAIM.equals(actionRequest.getAction())) {
-            claimTask(task, actionRequest);
-        } else if (TaskActionRequest.ACTION_DELEGATE.equals(actionRequest.getAction())) {
-            delegateTask(task, actionRequest);
-        } else if (TaskActionRequest.ACTION_RESOLVE.equals(actionRequest.getAction())) {
-            resolveTask(task, actionRequest);
-        } else {
-            throw new ActivitiIllegalArgumentException("Invalid action: '" + actionRequest.getAction() + "'.");
+        if (task != null) {
+            if (TaskActionRequest.ACTION_COMPLETE.equals(actionRequest.getAction())) {
+                completeTask(task, actionRequest);
+            } else if (TaskActionRequest.ACTION_CLAIM.equals(actionRequest.getAction())) {
+                claimTask(task, actionRequest);
+            } else if (TaskActionRequest.ACTION_DELEGATE.equals(actionRequest.getAction())) {
+                delegateTask(task, actionRequest);
+            } else if (TaskActionRequest.ACTION_RESOLVE.equals(actionRequest.getAction())) {
+                resolveTask(task, actionRequest);
+            } else {
+                throw new ActivitiIllegalArgumentException("Invalid action: '" + actionRequest.getAction() + "'.");
+            }
         }
     }
 

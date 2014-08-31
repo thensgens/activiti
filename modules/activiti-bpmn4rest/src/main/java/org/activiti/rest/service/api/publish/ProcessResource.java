@@ -18,9 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.impl.DeploymentQueryProperty;
+import org.activiti.engine.impl.bpmn.behavior.RestPublishTaskActivityBehavior;
 import org.activiti.engine.query.QueryProperty;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
@@ -56,34 +58,41 @@ public class ProcessResource extends SecuredResource {
 
     @Get
     public DataResponse getProcessDefinitions() {
+        DataResponse response = new DataResponse();
         ProcessDefinitionQuery processDefinitionQuery = ActivitiUtil.getRepositoryService().createProcessDefinitionQuery();
         String process = getAttribute("process");
-        processDefinitionQuery.processDefinitionKey(process);
 
-        List<ProcessDefinitionResponse> responseList = new ArrayList<ProcessDefinitionResponse>();
-        for (ProcessDefinition definition : processDefinitionQuery.list()) {
-            ProcessDefinitionResponse responseEntry = new ProcessDefinitionResponse();
-            responseEntry.setId(definition.getId());
-            responseEntry.setName(definition.getName());
-            responseEntry.setKey(definition.getKey());
-            responseEntry.setCategory(definition.getCategory());
-            responseEntry.setDeploymentId(definition.getDeploymentId());
-            responseEntry.setVersion(definition.getVersion());
-            responseEntry.setDeploymentId(definition.getDeploymentId());
-            responseEntry.setSuspended(definition.isSuspended());
-            responseList.add(responseEntry);
+        // check if the process name has the common B4R prefix
+        if (process.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
+            processDefinitionQuery.processDefinitionKey(process);
+
+            List<ProcessDefinitionResponse> responseList = new ArrayList<ProcessDefinitionResponse>();
+            for (ProcessDefinition definition : processDefinitionQuery.list()) {
+                ProcessDefinitionResponse responseEntry = new ProcessDefinitionResponse();
+                responseEntry.setId(definition.getId());
+                responseEntry.setName(definition.getName());
+                responseEntry.setKey(definition.getKey());
+                responseEntry.setCategory(definition.getCategory());
+                responseEntry.setDeploymentId(definition.getDeploymentId());
+                responseEntry.setVersion(definition.getVersion());
+                responseEntry.setDeploymentId(definition.getDeploymentId());
+                responseEntry.setSuspended(definition.isSuspended());
+                responseList.add(responseEntry);
+            }
+
+            // TODO: fallback to 'processDefinitionKeyLike' query if the 'processDefinitionKey' doesn't return anything
+            // ...
+
+            response.setStart(0);
+            response.setSize(responseList.size());
+            response.setSort("name");
+            response.setOrder("asc");
+            response.setTotal(responseList.size());
+            response.setData(responseList);
+        } else {
+            setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+            throw new ActivitiException("REST publish tasks have to start with the common prefix 'rest_'.");
         }
-
-        // TODO: fallback to 'processDefinitionKeyLike' query if the 'processDefinitionKey' doesn't return anything
-        // ...
-
-        DataResponse response = new DataResponse();
-        response.setStart(0);
-        response.setSize(responseList.size());
-        response.setSort("name");
-        response.setOrder("asc");
-        response.setTotal(responseList.size());
-        response.setData(responseList);
         return response;
     }
 
@@ -91,6 +100,11 @@ public class ProcessResource extends SecuredResource {
     public ProcessInstanceResponse createProcessInstance(ProcessInstanceCreateRequest request) {
         if (!authenticate()) {
             return null;
+        }
+        // check if the process name has the common B4R prefix
+        if (!getAttribute("process").startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
+            setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+            throw new ActivitiException("REST publish tasks have to start with the common prefix 'rest_'.");
         }
 
         RestResponseFactory factory = getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory();

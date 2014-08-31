@@ -32,4 +32,4 @@ Notes/Problems:
 (4) REST publish tasks are not being treated differently from (regular) user tasks (both task types can be queried via REST equally)
     Quick'n'Dirty: REST publish tasks ids have to start with a predefined prefix, e.g. 'rest_pub_*'
     (!) Same goes for REST processes; these cannot be flagged properly due to editor limitations.
-    Idea: Convention for both REST tasks and processes (e.g. name has to start with a specific prefix)
+    Idea: Convention for both REST tasks and processes (e.g. name has to start with a common prefix)

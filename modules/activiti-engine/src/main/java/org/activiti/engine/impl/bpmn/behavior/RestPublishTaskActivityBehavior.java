@@ -26,6 +26,10 @@ public class RestPublishTaskActivityBehavior extends TaskActivityBehavior {
     protected ServiceTask mServiceTask;
     protected TaskDefinition mTaskDefinition;
 
+    public static class RestPublishConstants {
+        public static String COMMON_PREFIX = "rest_";
+    }
+
     public RestPublishTaskActivityBehavior(ServiceTask serviceTask, TaskDefinition taskDefinition) {
         mServiceTask = serviceTask;
         mTaskDefinition = taskDefinition;

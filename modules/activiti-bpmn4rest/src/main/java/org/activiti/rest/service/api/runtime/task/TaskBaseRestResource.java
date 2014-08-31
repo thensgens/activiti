@@ -1,8 +1,10 @@
 package org.activiti.rest.service.api.runtime.task;
 
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.ActivitiIllegalArgumentException;
 import org.activiti.engine.ActivitiObjectNotFoundException;
 import org.activiti.engine.history.HistoricTaskInstance;
+import org.activiti.engine.impl.bpmn.behavior.RestPublishTaskActivityBehavior;
 import org.activiti.engine.task.Task;
 import org.activiti.rest.common.api.ActivitiUtil;
 
@@ -16,15 +18,21 @@ public class TaskBaseRestResource extends TaskBaseResource {
         String processDefinitionKey = getAttribute("process");
         String processInstanceId = getAttribute("instance");
         String taskKey = getAttribute("task");
+        Task task = null;
 
-        if (taskKey == null) {
-            throw new ActivitiIllegalArgumentException("The task key cannot be null");
-        }
+        if (processDefinitionKey.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)
+                && taskKey.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
+            if (taskKey == null) {
+                throw new ActivitiIllegalArgumentException("The task key cannot be null");
+            }
 
-        Task task = ActivitiUtil.getTaskService().createTaskQuery().processDefinitionKey(processDefinitionKey)
-                .processInstanceId(processInstanceId).taskDefinitionKey(taskKey).singleResult();
-        if (task == null) {
-            throw new ActivitiObjectNotFoundException("Could not find a task with id '" + taskKey + "'.", Task.class);
+            task = ActivitiUtil.getTaskService().createTaskQuery().processDefinitionKey(processDefinitionKey)
+                    .processInstanceId(processInstanceId).taskDefinitionKey(taskKey).singleResult();
+            if (task == null) {
+                throw new ActivitiObjectNotFoundException("Could not find a task with id '" + taskKey + "'.", Task.class);
+            }
+        } else {
+            throw new ActivitiException("REST publish tasks have to start with the common prefix 'rest_'.");
         }
         return task;
     }
