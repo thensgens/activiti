@@ -128,7 +128,7 @@
 
 <dependency>
 	<groupId>de.fh.aachen.bpmn</groupId>
-	<artifactId>rest-extensions-delegates</artifactId>
+	<artifactId>rest-ext-delegates</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 </dependency>
 
