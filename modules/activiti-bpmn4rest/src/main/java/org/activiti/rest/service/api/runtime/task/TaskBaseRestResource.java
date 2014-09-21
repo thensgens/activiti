@@ -20,8 +20,7 @@ public class TaskBaseRestResource extends TaskBaseResource {
         String taskKey = getAttribute("task");
         Task task = null;
 
-        if (processDefinitionKey.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)
-                && taskKey.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
+        if (taskKey.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
             if (taskKey == null) {
                 throw new ActivitiIllegalArgumentException("The task key cannot be null");
             }

@@ -91,7 +91,7 @@ public class ProcessResource extends SecuredResource {
             response.setData(responseList);
         } else {
             setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
-            throw new ActivitiException("REST publish tasks have to start with the common prefix 'rest_'.");
+            throw new ActivitiException("REST publish processes have to start with the common prefix 'rest_'.");
         }
         return response;
     }
@@ -104,7 +104,7 @@ public class ProcessResource extends SecuredResource {
         // check if the process name has the common B4R prefix
         if (!getAttribute("process").startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
             setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
-            throw new ActivitiException("REST publish tasks have to start with the common prefix 'rest_'.");
+            throw new ActivitiException("REST publish processes have to start with the common prefix 'rest_'.");
         }
 
         RestResponseFactory factory = getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory();

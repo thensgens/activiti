@@ -64,8 +64,7 @@ public class TaskResource extends TaskBaseRestResource {
             throw new ActivitiIllegalArgumentException("The task identifier cannot be null");
         }
 
-        if (processName.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)
-                && taskName.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
+        if (taskName.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
             Task requestedTask = ActivitiUtil.getTaskService().createTaskQuery().processDefinitionKey(processName)
                     .processInstanceId(instanceName).taskDefinitionKey(taskName).singleResult();
             if (requestedTask == null) {
