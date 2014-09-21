@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="myProcess" name="My process" isExecutable="true">
+    <startEvent id="startevent1" name="Start"></startEvent>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <serviceTask id="servicetask1" name="Arbeit benoten" activiti:class="de.fh.aachen.bpmn.rest.delegates.RestPublishJavaDelegate" activiti:extensionId="de.fh.aachen.bpmn.designer.RestPublishTask">
+      <extensionElements>
+        <activiti:field name="assignee">
+          <activiti:string>kermit</activiti:string>
+        </activiti:field>
+        <activiti:field name="formKey">
+          <activiti:string>myFormKey</activiti:string>
+        </activiti:field>
+        <activiti:field name="formProperties">
+          <activiti:string>{
+	"formProperties" : [
+		{
+			"id" : "foo",
+			"name" : "FOOOOOOOO",
+			"type" : "string",
+			"required" : true,
+			"readable" : true,
+			"writable" : true,
+			"variableName" : "",
+			"expression" : "",
+			"defaultExpression" : "Der Default Wert für foo."
+		},
+		{
+			"id" : "bar",
+			"name" : "BAAAAAAAAAAAAAR",
+			"type" : "string",
+			"required" : true,
+			"readable" : true,
+			"writable" : true,
+			"variableName" : "var",
+			"expression" : "",
+			"defaultExpression" : ""
+		}
+	]
+}</activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow2" sourceRef="servicetask1" targetRef="endevent1"></sequenceFlow>
+    <userTask id="usertask1" name="User Task" activiti:assignee="kermit">
+      <extensionElements>
+        <activiti:formProperty id="my_var" name="Die Variable" type="string" variable="var" required="true"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow3" sourceRef="startevent1" targetRef="usertask1"></sequenceFlow>
+    <sequenceFlow id="flow4" sourceRef="usertask1" targetRef="servicetask1"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_myProcess">
+    <bpmndi:BPMNPlane bpmnElement="myProcess" id="BPMNPlane_myProcess">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="220.0" y="270.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="730.0" y="250.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask1" id="BPMNShape_servicetask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="460.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="usertask1" id="BPMNShape_usertask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="320.0" y="120.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
+        <omgdi:waypoint x="565.0" y="287.0"></omgdi:waypoint>
+        <omgdi:waypoint x="747.0" y="287.0"></omgdi:waypoint>
+        <omgdi:waypoint x="765.0" y="267.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="237.0" y="270.0"></omgdi:waypoint>
+        <omgdi:waypoint x="372.0" y="175.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
+        <omgdi:waypoint x="372.0" y="175.0"></omgdi:waypoint>
+        <omgdi:waypoint x="512.0" y="260.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

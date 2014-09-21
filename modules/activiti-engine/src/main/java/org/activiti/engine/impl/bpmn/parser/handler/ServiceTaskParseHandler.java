@@ -12,8 +12,10 @@
  */
 package org.activiti.engine.impl.bpmn.parser.handler;
 
+import com.google.gson.*;
 import org.activiti.bpmn.constants.BpmnXMLConstants;
 import org.activiti.bpmn.model.*;
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.impl.bpmn.behavior.WebServiceActivityBehavior;
 import org.activiti.engine.impl.bpmn.data.AbstractDataAssociation;
 import org.activiti.engine.impl.bpmn.data.IOSpecification;
@@ -24,12 +26,15 @@ import org.activiti.engine.impl.form.TaskFormHandler;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.task.TaskDefinition;
+import org.activiti.engine.impl.util.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -121,23 +126,37 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
     private TaskDefinition createTaskDefinition(BpmnParse bpmnParse, ServiceTask serviceTask) {
         TaskFormHandler taskFormHandler = new DefaultTaskFormHandler();
 
-        // Create mocked form properties
-        List<FormProperty> mockedFormProps = new ArrayList<FormProperty>();
-        FormProperty mockProperty = new FormProperty();
-        mockProperty.setId("mock");
-        mockProperty.setName("Sample mock property");
-        mockProperty.setType("string");
-        mockProperty.setRequired(true);
-        mockProperty.setReadable(true);
-        mockProperty.setWriteable(true);
-        mockedFormProps.add(mockProperty);
+        /** Hint:
+         *  Relevant values for the field extension(s)
+         *      getFieldName   : represents the name in the UI
+         *      getStringValue : contains the actual value
+         */
 
-        // Set mocked form key (here: empty string for now)
-        String mockedFormKey = "";
+        String assigneeIdentifier = "assignee";
+        String formKeyIdentifier = "formKey";
+        String formPropIdentifier = "formProperties";
+        String assignee = "";
+        String formKey = "";
+        String formPropsJson  = "";
+
+
+        for (FieldExtension ext : serviceTask.getFieldExtensions()) {
+            if (ext.getFieldName().equals(formPropIdentifier)) {
+                formPropsJson = ext.getStringValue();
+            } else if (ext.getFieldName().equals(assigneeIdentifier)) {
+                assignee = ext.getStringValue();
+            } else if (ext.getFieldName().equals(formKeyIdentifier)) {
+                formKey = ext.getStringValue();
+            }
+        }
+
+        // parse the form properties (input format is json) and populate the form property list
+        List<FormProperty> formPropList = populateFormPropList(formPropsJson);
+
 
         // retrieve process definitions from the current scope
         ProcessDefinitionEntity processDefinition = (ProcessDefinitionEntity) bpmnParse.getCurrentScope().getProcessDefinition();
-        taskFormHandler.parseConfiguration(mockedFormProps, mockedFormKey, bpmnParse.getDeployment(), processDefinition);
+        taskFormHandler.parseConfiguration(formPropList, formKey, bpmnParse.getDeployment(), processDefinition);
         TaskDefinition taskDefinition = new TaskDefinition(taskFormHandler);
         taskDefinition.setKey(serviceTask.getId());
         processDefinition.getTaskDefinitions().put(serviceTask.getId(), taskDefinition);
@@ -150,59 +169,35 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
         return taskDefinition;
     }
 
+    private List<FormProperty> populateFormPropList(String formPropsInput) {
+        JsonParser jsonParser = new JsonParser();
+        List<FormProperty> resultList = new ArrayList<FormProperty>();
 
-    // ==================== //
-//
-//        taskFormHandler.parseConfiguration(userTask.getFormProperties(), userTask.getFormKey(), bpmnParse.getDeployment(), processDefinition);
-//
-//        TaskDefinition taskDefinition = new TaskDefinition(taskFormHandler);
-//
-//        taskDefinition.setKey(taskDefinitionKey);
-//        processDefinition.getTaskDefinitions().put(taskDefinitionKey, taskDefinition);
-//        ExpressionManager expressionManager = bpmnParse.getExpressionManager();
-//
-//        if (StringUtils.isNotEmpty(userTask.getName())) {
-//            taskDefinition.setNameExpression(expressionManager.createExpression(userTask.getName()));
-//        }
-//
-//        if (StringUtils.isNotEmpty(userTask.getDocumentation())) {
-//            taskDefinition.setDescriptionExpression(expressionManager.createExpression(userTask.getDocumentation()));
-//        }
-//
-//        if (StringUtils.isNotEmpty(userTask.getAssignee())) {
-//            taskDefinition.setAssigneeExpression(expressionManager.createExpression(userTask.getAssignee()));
-//        }
-//        if (StringUtils.isNotEmpty(userTask.getOwner())) {
-//            taskDefinition.setOwnerExpression(expressionManager.createExpression(userTask.getOwner()));
-//        }
-//        for (String candidateUser : userTask.getCandidateUsers()) {
-//            taskDefinition.addCandidateUserIdExpression(expressionManager.createExpression(candidateUser));
-//        }
-//        for (String candidateGroup : userTask.getCandidateGroups()) {
-//            taskDefinition.addCandidateGroupIdExpression(expressionManager.createExpression(candidateGroup));
-//        }
-//
-//        // Activiti custom extension
-//
-//        // Task listeners
-//        for (ActivitiListener taskListener : userTask.getTaskListeners()) {
-//            taskDefinition.addTaskListener(taskListener.getEvent(), createTaskListener(bpmnParse, taskListener, userTask.getId()));
-//        }
-//
-//        // Due date
-//        if (StringUtils.isNotEmpty(userTask.getDueDate())) {
-//            taskDefinition.setDueDateExpression(expressionManager.createExpression(userTask.getDueDate()));
-//        }
-//
-//        // Category
-//        if (StringUtils.isNotEmpty(userTask.getCategory())) {
-//            taskDefinition.setCategoryExpression(expressionManager.createExpression(userTask.getCategory()));
-//        }
-//
-//        // Priority
-//        if (StringUtils.isNotEmpty(userTask.getPriority())) {
-//            taskDefinition.setPriorityExpression(expressionManager.createExpression(userTask.getPriority()));
-//        }
+        try {
+            JsonObject object = (JsonObject) jsonParser.parse(formPropsInput);
+            Iterator<Map.Entry<String, JsonElement>> iter = object.entrySet().iterator();
+            Map.Entry<String, JsonElement> entry = iter.next();
+            JsonArray propertyArray = (JsonArray) entry.getValue();
+            for (JsonElement jsonElement : propertyArray) {
+                JsonObject arrayEntryObject = (JsonObject) jsonElement;
+                FormProperty property = new FormProperty();
+                property.setId(arrayEntryObject.getAsJsonPrimitive("id").getAsString());
+                property.setName(arrayEntryObject.getAsJsonPrimitive("name").getAsString());
+                property.setType(arrayEntryObject.getAsJsonPrimitive("type").getAsString());
+                property.setRequired(arrayEntryObject.getAsJsonPrimitive("required").getAsBoolean());
+                property.setReadable(arrayEntryObject.getAsJsonPrimitive("readable").getAsBoolean());
+                property.setReadable(arrayEntryObject.getAsJsonPrimitive("writable").getAsBoolean());
+                property.setVariable(arrayEntryObject.getAsJsonPrimitive("variableName").getAsString());
+                property.setExpression(arrayEntryObject.getAsJsonPrimitive("expression").getAsString());
+                property.setDefaultExpression(arrayEntryObject.getAsJsonPrimitive("defaultExpression").getAsString());
 
+                resultList.add(property);
+            }
+        } catch (JsonSyntaxException e) {
+            throw new ActivitiException(e.getMessage());
+        } catch (Exception e) {
+            throw new ActivitiException("Error during parsing of form properties.");
+        }
+        return resultList;
+    }
 }
-

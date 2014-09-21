@@ -19,7 +19,7 @@ public class PaletteCustomizer extends AbstractDefaultPaletteCustomizer {
 		List<PaletteEntry> result = new ArrayList<PaletteEntry>();
 //		
 //		//Disable the mail task
-		result.add(PaletteEntry.MAIL_TASK);
+//		result.add(PaletteEntry.MAIL_TASK);
 		return result;
 	}
 }

@@ -72,6 +72,6 @@ public class RestConsumerTask extends AbstractCustomServiceTask {
 
 	@Override
 	public String getSmallIconPath() {
-		return "icons/coins.png";
+		return "icons/rsz_consume_task_icon.png";
 	}
 }
