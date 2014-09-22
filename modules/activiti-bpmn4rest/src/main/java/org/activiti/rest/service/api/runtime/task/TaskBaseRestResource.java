@@ -27,9 +27,6 @@ public class TaskBaseRestResource extends TaskBaseResource {
 
             task = ActivitiUtil.getTaskService().createTaskQuery().processDefinitionKey(processDefinitionKey)
                     .processInstanceId(processInstanceId).taskDefinitionKey(taskKey).singleResult();
-            if (task == null) {
-                throw new ActivitiObjectNotFoundException("Could not find a task with id '" + taskKey + "'.", Task.class);
-            }
         } else {
             throw new ActivitiException("REST publish tasks have to start with the common prefix 'rest_'.");
         }
@@ -54,5 +51,13 @@ public class TaskBaseRestResource extends TaskBaseResource {
                     taskKey + "'.", Task.class);
         }
         return task;
+    }
+
+    protected boolean isProcessInstanceActive() {
+        String processDefinitionKey = getAttribute("process");
+        String processInstanceId = getAttribute("instance");
+
+        return ActivitiUtil.getTaskService().createTaskQuery().processDefinitionKey(processDefinitionKey)
+                .processInstanceId(processInstanceId).singleResult() != null;
     }
 }

@@ -43,11 +43,14 @@ public class TaskResource extends TaskBaseRestResource {
 
     private static Map<String, QueryProperty> allowedSortProperties = new HashMap<String, QueryProperty>();
 
+    private static final HashMap<String, Task> mTaskMap;
+
     static {
         allowedSortProperties.put("id", DeploymentQueryProperty.DEPLOYMENT_ID);
         allowedSortProperties.put("name", DeploymentQueryProperty.DEPLOYMENT_NAME);
         allowedSortProperties.put("deployTime", DeploymentQueryProperty.DEPLOY_TIME);
         allowedSortProperties.put("tenantId", DeploymentQueryProperty.DEPLOYMENT_TENANT_ID);
+        mTaskMap = new HashMap<String, Task>();
     }
 
     @Get
@@ -56,19 +59,30 @@ public class TaskResource extends TaskBaseRestResource {
             return null;
         }
 
-        String processName = getAttribute("process");
-        String instanceName = getAttribute("instance");
+        String processInstance = getAttribute("instance");
         String taskName = getAttribute("task");
+        String taskMapKey = processInstance + "/" + taskName;
 
         if (taskName == null) {
             throw new ActivitiIllegalArgumentException("The task identifier cannot be null");
         }
 
         if (taskName.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
-            Task requestedTask = ActivitiUtil.getTaskService().createTaskQuery().processDefinitionKey(processName)
-                    .processInstanceId(instanceName).taskDefinitionKey(taskName).singleResult();
+            Task requestedTask = getTaskFromRequest();
+            if (requestedTask == null && isProcessInstanceActive()) {
+                // the task is not in the engine anymore but the related process instance is still active,
+                // but it might be in our task cache which is valid as long as the related process
+                // instance has not been deleted
+                if (mTaskMap.containsKey(taskMapKey)) {
+                    requestedTask = mTaskMap.get(taskMapKey);
+                } else {
+                    throw new ActivitiObjectNotFoundException("Could not find a task with id '" + taskName + "'.", Task.class);
+                }
+            }
+            // the task is still null, thus the process instance has been shutdown
             if (requestedTask == null) {
-                throw new ActivitiObjectNotFoundException("Could not find a task with id '" + taskName + "'.", Task.class);
+                throw new ActivitiObjectNotFoundException("Could not find a task with id '" + taskName + "'" +
+                        " and/or the related process instance has been shutdown.", Task.class);
             }
             return getApplication(ActivitiRestServicesApplication.class).getRestResponseFactory()
                     .createTaskResponse(this, requestedTask);
@@ -84,25 +98,44 @@ public class TaskResource extends TaskBaseRestResource {
             return;
         }
 
-        if (actionRequest == null) {
-            throw new ResourceException(new Status(Status.CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE.getCode(),
-                    "A request body was expected when executing a task action.",
-                    null, null));
+        String processInstance = getAttribute("instance");
+        String taskName = getAttribute("task");
+        String taskMapKey = processInstance + "/" + taskName;
+
+        if (taskName == null) {
+            throw new ActivitiIllegalArgumentException("The task identifier cannot be null");
         }
 
-        Task task = getTaskFromRequest();
-        if (task != null) {
-            if (TaskActionRequest.ACTION_COMPLETE.equals(actionRequest.getAction())) {
-                completeTask(task, actionRequest);
-            } else if (TaskActionRequest.ACTION_CLAIM.equals(actionRequest.getAction())) {
-                claimTask(task, actionRequest);
-            } else if (TaskActionRequest.ACTION_DELEGATE.equals(actionRequest.getAction())) {
-                delegateTask(task, actionRequest);
-            } else if (TaskActionRequest.ACTION_RESOLVE.equals(actionRequest.getAction())) {
-                resolveTask(task, actionRequest);
-            } else {
-                throw new ActivitiIllegalArgumentException("Invalid action: '" + actionRequest.getAction() + "'.");
+        if (taskName.startsWith(RestPublishTaskActivityBehavior.RestPublishConstants.COMMON_PREFIX)) {
+            if (actionRequest == null) {
+                throw new ResourceException(new Status(Status.CLIENT_ERROR_UNSUPPORTED_MEDIA_TYPE.getCode(),
+                        "A request body was expected when executing a task action.",
+                        null, null));
             }
+
+            Task task = getTaskFromRequest();
+
+            if (task != null) {
+                // save the task for later retrieval (even if the task has been completed)
+                if (!mTaskMap.containsKey(taskMapKey)) {
+                    mTaskMap.put(taskMapKey, task);
+                }
+
+                if (TaskActionRequest.ACTION_COMPLETE.equals(actionRequest.getAction())) {
+                    completeTask(task, actionRequest);
+                } else if (TaskActionRequest.ACTION_CLAIM.equals(actionRequest.getAction())) {
+                    claimTask(task, actionRequest);
+                } else if (TaskActionRequest.ACTION_DELEGATE.equals(actionRequest.getAction())) {
+                    delegateTask(task, actionRequest);
+                } else if (TaskActionRequest.ACTION_RESOLVE.equals(actionRequest.getAction())) {
+                    resolveTask(task, actionRequest);
+                } else {
+                    throw new ActivitiIllegalArgumentException("Invalid action: '" + actionRequest.getAction() + "'.");
+                }
+            }
+        } else {
+            setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+            throw new ActivitiException("REST publish tasks have to start with the common prefix 'rest_'.");
         }
     }
 
