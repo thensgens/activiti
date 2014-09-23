@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.fh-aachen.de/bachelorarbeit">
+  <collaboration id="Collaboration">
+    <participant id="bachelorarbeit_pool" name="Bachelorarbeit" processRef="bachelorarbeit"></participant>
+  </collaboration>
+  <process id="bachelorarbeit" name="Bachelorarbeit" isExecutable="true">
+    <documentation>Prozess zur Anmeldung und Durchführung einer Bachlorprüfung</documentation>
+    <laneSet id="laneSet_bachelorarbeit">
+      <lane id="lane1" name="Professor">
+        <flowNodeRef>exclusivegateway2</flowNodeRef>
+        <flowNodeRef>mailtask5</flowNodeRef>
+        <flowNodeRef>endevent4</flowNodeRef>
+        <flowNodeRef>usertask5</flowNodeRef>
+        <flowNodeRef>mailtask6</flowNodeRef>
+        <flowNodeRef>endevent5</flowNodeRef>
+        <flowNodeRef>rest_arbeit_benoten</flowNodeRef>
+      </lane>
+      <lane id="lane2" name="Student">
+        <flowNodeRef>usertask1</flowNodeRef>
+        <flowNodeRef>mailtask1</flowNodeRef>
+        <flowNodeRef>usertask2</flowNodeRef>
+        <flowNodeRef>boundarytimer1</flowNodeRef>
+        <flowNodeRef>mailtask3</flowNodeRef>
+        <flowNodeRef>endevent2</flowNodeRef>
+        <flowNodeRef>consumetask1</flowNodeRef>
+        <flowNodeRef>startevent1</flowNodeRef>
+        <flowNodeRef>startevent1</flowNodeRef>
+      </lane>
+      <lane id="lane3" name="Prüfungsamt">
+        <flowNodeRef>exclusivegateway1</flowNodeRef>
+        <flowNodeRef>servicetask3</flowNodeRef>
+        <flowNodeRef>mailtask2</flowNodeRef>
+        <flowNodeRef>endevent1</flowNodeRef>
+        <flowNodeRef>consumetask2</flowNodeRef>
+      </lane>
+    </laneSet>
+    <userTask id="usertask1" name="Antrag ausfüllen" activiti:assignee="${student}">
+      <documentation>Antrag auf Zulassung zur Bachelorarbeit. Ihr Thema ist „${thema}“.</documentation>
+      <extensionElements>
+        <activiti:formProperty id="mail" name="E-Mail-Adresse" type="string" default="${student}@alumni.fh-aachen.de" required="true"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
+    <serviceTask id="servicetask3" name="Bearbeitungsfrist" activiti:class="fh.SoapDelegate">
+      <extensionElements>
+        <activiti:field name="wsdl">
+          <activiti:string>http://localhost:8080/BachelorServices/services/BachelorService?wsdl</activiti:string>
+        </activiti:field>
+        <activiti:field name="method">
+          <activiti:string>getFrist</activiti:string>
+        </activiti:field>
+        <activiti:field name="result">
+          <activiti:string>frist</activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow5" name="Zugelassen" sourceRef="exclusivegateway1" targetRef="servicetask3">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${zugelassen}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow7" sourceRef="servicetask3" targetRef="mailtask1"></sequenceFlow>
+    <serviceTask id="mailtask1" name="Zulassung" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:expression>${mail}</activiti:expression>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string>no-reply@fh-aachen.de</activiti:string>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string>Zulassung zur Bachelorarbeit</activiti:string>
+        </activiti:field>
+        <activiti:field name="cc">
+          <activiti:expression>${professor}@fh-aachen.de</activiti:expression>
+        </activiti:field>
+        <activiti:field name="text">
+          <activiti:expression>Sie wurden zur Bachelorarbeit zugelassen.
+
+Abgabefrist: ${frist}</activiti:expression>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <userTask id="usertask2" name="Arbeit schreiben" activiti:assignee="${student}">
+      <extensionElements>
+        <activiti:formProperty id="arbeit" name="Bachelorarbeit" type="string" default="Meine Bachelorarbeit: ... ist diese Box nicht etwas klein?" required="true"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow8" sourceRef="mailtask1" targetRef="usertask2"></sequenceFlow>
+    <serviceTask id="mailtask2" name="Nicht zugelasen" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:expression>${mail}</activiti:expression>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string>no-reply@fh-aachen.de</activiti:string>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string>Keine Zulassung zur Bachelorarbeit</activiti:string>
+        </activiti:field>
+        <activiti:field name="cc">
+          <activiti:expression>${professor}@fh-aachen.de</activiti:expression>
+        </activiti:field>
+        <activiti:field name="text">
+          <activiti:string>Sie wurden nicht zur Bachelorarbeit zugelassen.
+
+Viel Glück im nächsten Semester.</activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow9" name="Nicht zugelassen" sourceRef="exclusivegateway1" targetRef="mailtask2">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!zugelassen}]]></conditionExpression>
+    </sequenceFlow>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <sequenceFlow id="flow10" sourceRef="mailtask2" targetRef="endevent1"></sequenceFlow>
+    <boundaryEvent id="boundarytimer1" name="Timer" attachedToRef="usertask2" cancelActivity="true">
+      <timerEventDefinition>
+        <timeDate>${frist}</timeDate>
+      </timerEventDefinition>
+    </boundaryEvent>
+    <serviceTask id="mailtask3" name="Frist überschritten" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:expression>${mail}</activiti:expression>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string>no-reply@fh-aachen.de</activiti:string>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string>Frist zur Abgabe der Bachelorarbeit überschritten</activiti:string>
+        </activiti:field>
+        <activiti:field name="cc">
+          <activiti:expression>${professor}@fh-aachen.de</activiti:expression>
+        </activiti:field>
+        <activiti:field name="text">
+          <activiti:string>Sie haben die Abgabefrist für ihre Bachelorarbeit verpasst.
+
+Dumm gelaufen.</activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow11" sourceRef="boundarytimer1" targetRef="mailtask3"></sequenceFlow>
+    <endEvent id="endevent2" name="End"></endEvent>
+    <sequenceFlow id="flow12" sourceRef="mailtask3" targetRef="endevent2"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway"></exclusiveGateway>
+    <serviceTask id="mailtask5" name="Nicht bestanden" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:expression>${mail}</activiti:expression>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string>no-reply@fh-aachen.de</activiti:string>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string>Bachelorarbeit nicht bestanden</activiti:string>
+        </activiti:field>
+        <activiti:field name="text">
+          <activiti:string>Sie haben ihre Bachelorprüfung nicht bestanden.</activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <endEvent id="endevent4" name="End"></endEvent>
+    <sequenceFlow id="flow18" sourceRef="mailtask5" targetRef="endevent4"></sequenceFlow>
+    <sequenceFlow id="flow19" name="Nicht bestanden" sourceRef="exclusivegateway2" targetRef="mailtask5">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!bestanden}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="usertask5" name="Kolloquium" activiti:assignee="${professor}">
+      <documentation>Halten Sie das Kolloquium von ${student} und tragen dann die Abschlussnote ein.</documentation>
+      <extensionElements>
+        <activiti:formProperty id="note" name="Note" type="string" required="true"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow22" name="Bestanden" sourceRef="exclusivegateway2" targetRef="usertask5">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${bestanden}]]></conditionExpression>
+    </sequenceFlow>
+    <serviceTask id="mailtask6" name="Ergebnis" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:expression>${mail}</activiti:expression>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string>no-reply@fh-aachen.de</activiti:string>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string>Abschlussnote</activiti:string>
+        </activiti:field>
+        <activiti:field name="text">
+          <activiti:expression>Ihre Abschlussnote ist: ${note}</activiti:expression>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow23" sourceRef="usertask5" targetRef="mailtask6"></sequenceFlow>
+    <endEvent id="endevent5" name="End"></endEvent>
+    <sequenceFlow id="flow24" sourceRef="mailtask6" targetRef="endevent5"></sequenceFlow>
+    <serviceTask id="consumetask1" name="Studentendaten abrufen" activiti:class="de.fh.aachen.bpmn.rest.impl.delegates.RestConsumerJavaDelegate" activiti:extensionId="de.fh.aachen.bpmn.designer.RestConsumerTask">
+      <extensionElements>
+        <activiti:field name="httpVerb">
+          <activiti:string>GET</activiti:string>
+        </activiti:field>
+        <activiti:field name="urlResource">
+          <activiti:string>http://localhost:8080/students/370498</activiti:string>
+        </activiti:field>
+        <activiti:field name="contentType">
+          <activiti:string>application/json</activiti:string>
+        </activiti:field>
+        <activiti:field name="resultVariable">
+          <activiti:string>result_student_daten</activiti:string>
+        </activiti:field>
+        <activiti:field name="authRequired">
+          <activiti:string>true</activiti:string>
+        </activiti:field>
+        <activiti:field name="authName">
+          <activiti:string>login_user</activiti:string>
+        </activiti:field>
+        <activiti:field name="authPw">
+          <activiti:string>login_pw</activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow26" sourceRef="consumetask1" targetRef="usertask1"></sequenceFlow>
+    <serviceTask id="consumetask2" name="Zulassung prüfen" activiti:class="de.fh.aachen.bpmn.rest.impl.delegates.RestConsumerJavaDelegate" activiti:extensionId="de.fh.aachen.bpmn.designer.RestConsumerTask">
+      <extensionElements>
+        <activiti:field name="httpVerb">
+          <activiti:string>GET</activiti:string>
+        </activiti:field>
+        <activiti:field name="urlResource">
+          <activiti:string>http://localhost:8080/zulassung/370498</activiti:string>
+        </activiti:field>
+        <activiti:field name="contentType">
+          <activiti:string>application/json</activiti:string>
+        </activiti:field>
+        <activiti:field name="resultVariable">
+          <activiti:string>result_zulassung</activiti:string>
+        </activiti:field>
+        <activiti:field name="authRequired">
+          <activiti:string>true</activiti:string>
+        </activiti:field>
+        <activiti:field name="authName">
+          <activiti:string>login_user</activiti:string>
+        </activiti:field>
+        <activiti:field name="authPw">
+          <activiti:string>login_pw</activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow27" sourceRef="usertask1" targetRef="consumetask2"></sequenceFlow>
+    <sequenceFlow id="flow28" sourceRef="consumetask2" targetRef="exclusivegateway1"></sequenceFlow>
+    <serviceTask id="rest_arbeit_benoten" name="Arbeit benoten" activiti:class="de.fh.aachen.bpmn.rest.delegates.RestPublishJavaDelegate" activiti:extensionId="de.fh.aachen.bpmn.designer.RestPublishTask">
+      <extensionElements>
+        <activiti:field name="assignee">
+          <activiti:string>kermit</activiti:string>
+        </activiti:field>
+        <activiti:field name="formKey">
+          <activiti:string>Benotung</activiti:string>
+        </activiti:field>
+        <activiti:field name="formProperties">
+          <activiti:string>{
+	"formProperties" : [
+		{
+			"id" : "benotung_auswahl",
+			"name" : "Bestanden?",
+			"type" : "boolean",
+			"required" : true,
+			"readable" : true,
+			"writable" : true,
+			"variableName" : "bestanden",
+			"expression" : "",
+			"defaultExpression" : ""
+		}
+	]
+}</activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow29" sourceRef="usertask2" targetRef="rest_arbeit_benoten"></sequenceFlow>
+    <sequenceFlow id="flow30" sourceRef="rest_arbeit_benoten" targetRef="exclusivegateway2"></sequenceFlow>
+    <startEvent id="startevent1" name="Start" activiti:initiator="professor">
+      <extensionElements>
+        <activiti:formProperty id="matrikelnummer" name="Matrikelnummer" type="long" required="true"></activiti:formProperty>
+        <activiti:formProperty id="thema" name="Thema" type="string" required="true"></activiti:formProperty>
+      </extensionElements>
+    </startEvent>
+    <sequenceFlow id="flow25" sourceRef="startevent1" targetRef="consumetask1"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration">
+    <bpmndi:BPMNPlane bpmnElement="Collaboration" id="BPMNPlane_Collaboration">
+      <bpmndi:BPMNShape bpmnElement="lane1" id="BPMNShape_lane1">
+        <omgdc:Bounds height="166.0" width="1091.0" x="30.0" y="30.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="lane2" id="BPMNShape_lane2">
+        <omgdc:Bounds height="166.0" width="1091.0" x="30.0" y="196.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="lane3" id="BPMNShape_lane3">
+        <omgdc:Bounds height="166.0" width="1091.0" x="30.0" y="362.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="70.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="usertask1" id="BPMNShape_usertask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="290.0" y="250.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="370.0" y="388.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask3" id="BPMNShape_servicetask3">
+        <omgdc:Bounds height="55.0" width="105.0" x="500.0" y="381.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="475.0" y="468.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mailtask1" id="BPMNShape_mailtask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="440.0" y="250.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="usertask2" id="BPMNShape_usertask2">
+        <omgdc:Bounds height="55.0" width="105.0" x="580.0" y="250.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundarytimer1" id="BPMNShape_boundarytimer1">
+        <omgdc:Bounds height="30.0" width="30.0" x="640.0" y="294.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mailtask2" id="BPMNShape_mailtask2">
+        <omgdc:Bounds height="55.0" width="105.0" x="338.0" y="458.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mailtask3" id="BPMNShape_mailtask3">
+        <omgdc:Bounds height="55.0" width="105.0" x="730.0" y="250.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent2" id="BPMNShape_endevent2">
+        <omgdc:Bounds height="35.0" width="35.0" x="860.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway2" id="BPMNShape_exclusivegateway2">
+        <omgdc:Bounds height="40.0" width="40.0" x="660.0" y="124.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mailtask5" id="BPMNShape_mailtask5">
+        <omgdc:Bounds height="55.0" width="105.0" x="628.0" y="50.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent4" id="BPMNShape_endevent4">
+        <omgdc:Bounds height="35.0" width="35.0" x="775.0" y="60.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="mailtask6" id="BPMNShape_mailtask6">
+        <omgdc:Bounds height="55.0" width="105.0" x="930.0" y="117.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="usertask5" id="BPMNShape_usertask5">
+        <omgdc:Bounds height="55.0" width="105.0" x="792.0" y="117.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent5" id="BPMNShape_endevent5">
+        <omgdc:Bounds height="35.0" width="35.0" x="1070.0" y="127.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="bachelorarbeit_pool" id="BPMNShape_bachelorarbeit_pool">
+        <omgdc:Bounds height="501.0" width="1111.0" x="10.0" y="30.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="consumetask1" id="BPMNShape_consumetask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="160.0" y="250.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="consumetask2" id="BPMNShape_consumetask2">
+        <omgdc:Bounds height="55.0" width="105.0" x="230.0" y="381.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="publishtask1" id="BPMNShape_publishtask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="524.0" y="117.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="rest_arbeit_benoten" id="BPMNShape_rest_arbeit_benoten">
+        <omgdc:Bounds height="55.0" width="105.0" x="524.0" y="117.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="410.0" y="408.0"></omgdi:waypoint>
+        <omgdi:waypoint x="500.0" y="408.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="55.0" x="-25.0" y="-20.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="552.0" y="381.0"></omgdi:waypoint>
+        <omgdi:waypoint x="552.0" y="337.0"></omgdi:waypoint>
+        <omgdi:waypoint x="492.0" y="337.0"></omgdi:waypoint>
+        <omgdi:waypoint x="492.0" y="305.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8">
+        <omgdi:waypoint x="545.0" y="277.0"></omgdi:waypoint>
+        <omgdi:waypoint x="580.0" y="277.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9">
+        <omgdi:waypoint x="390.0" y="428.0"></omgdi:waypoint>
+        <omgdi:waypoint x="390.0" y="458.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="80.0" x="10.0" y="0.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow10" id="BPMNEdge_flow10">
+        <omgdi:waypoint x="443.0" y="485.0"></omgdi:waypoint>
+        <omgdi:waypoint x="475.0" y="485.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow11" id="BPMNEdge_flow11">
+        <omgdi:waypoint x="670.0" y="309.0"></omgdi:waypoint>
+        <omgdi:waypoint x="706.0" y="308.0"></omgdi:waypoint>
+        <omgdi:waypoint x="706.0" y="276.0"></omgdi:waypoint>
+        <omgdi:waypoint x="730.0" y="277.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow12" id="BPMNEdge_flow12">
+        <omgdi:waypoint x="835.0" y="277.0"></omgdi:waypoint>
+        <omgdi:waypoint x="860.0" y="277.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow18" id="BPMNEdge_flow18">
+        <omgdi:waypoint x="733.0" y="77.0"></omgdi:waypoint>
+        <omgdi:waypoint x="775.0" y="77.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow19" id="BPMNEdge_flow19">
+        <omgdi:waypoint x="680.0" y="124.0"></omgdi:waypoint>
+        <omgdi:waypoint x="680.0" y="105.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="77.0" x="10.0" y="0.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow22" id="BPMNEdge_flow22">
+        <omgdi:waypoint x="700.0" y="144.0"></omgdi:waypoint>
+        <omgdi:waypoint x="792.0" y="144.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="13.0" width="51.0" x="-14.0" y="5.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow23" id="BPMNEdge_flow23">
+        <omgdi:waypoint x="897.0" y="144.0"></omgdi:waypoint>
+        <omgdi:waypoint x="930.0" y="144.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow24" id="BPMNEdge_flow24">
+        <omgdi:waypoint x="1035.0" y="144.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1070.0" y="144.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow25" id="BPMNEdge_flow25">
+        <omgdi:waypoint x="105.0" y="277.0"></omgdi:waypoint>
+        <omgdi:waypoint x="160.0" y="277.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow26" id="BPMNEdge_flow26">
+        <omgdi:waypoint x="265.0" y="277.0"></omgdi:waypoint>
+        <omgdi:waypoint x="290.0" y="277.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow27" id="BPMNEdge_flow27">
+        <omgdi:waypoint x="342.0" y="305.0"></omgdi:waypoint>
+        <omgdi:waypoint x="282.0" y="381.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow28" id="BPMNEdge_flow28">
+        <omgdi:waypoint x="335.0" y="408.0"></omgdi:waypoint>
+        <omgdi:waypoint x="370.0" y="408.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow29" id="BPMNEdge_flow29">
+        <omgdi:waypoint x="632.0" y="250.0"></omgdi:waypoint>
+        <omgdi:waypoint x="576.0" y="172.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow30" id="BPMNEdge_flow30">
+        <omgdi:waypoint x="629.0" y="144.0"></omgdi:waypoint>
+        <omgdi:waypoint x="660.0" y="144.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

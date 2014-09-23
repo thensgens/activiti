@@ -176,8 +176,8 @@ public class ServiceTaskParseHandler extends AbstractExternalInvocationBpmnParse
         try {
             JsonObject object = (JsonObject) jsonParser.parse(formPropsInput);
             Iterator<Map.Entry<String, JsonElement>> iter = object.entrySet().iterator();
-            Map.Entry<String, JsonElement> entry = iter.next();
-            JsonArray propertyArray = (JsonArray) entry.getValue();
+            Map.Entry<String, JsonElement> firstEntry = iter.next();
+            JsonArray propertyArray = (JsonArray) firstEntry.getValue();
             for (JsonElement jsonElement : propertyArray) {
                 JsonObject arrayEntryObject = (JsonObject) jsonElement;
                 FormProperty property = new FormProperty();
