@@ -351,9 +351,6 @@ Dumm gelaufen.</activiti:string>
       <bpmndi:BPMNShape bpmnElement="consumetask2" id="BPMNShape_consumetask2">
         <omgdc:Bounds height="55.0" width="105.0" x="230.0" y="381.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="publishtask1" id="BPMNShape_publishtask1">
-        <omgdc:Bounds height="55.0" width="105.0" x="524.0" y="117.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="rest_arbeit_benoten" id="BPMNShape_rest_arbeit_benoten">
         <omgdc:Bounds height="55.0" width="105.0" x="524.0" y="117.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>

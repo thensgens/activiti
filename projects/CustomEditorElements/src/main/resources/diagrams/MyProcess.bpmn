@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
-  <process id="rest_my_process" name="My process" isExecutable="true">
+  <process id="rest_ma_anmeldung" name="MA Anmeldung" isExecutable="true">
     <startEvent id="startevent1" name="Start"></startEvent>
     <endEvent id="endevent1" name="End"></endEvent>
-    <serviceTask id="rest_task" name="Arbeit benoten" activiti:class="de.fh.aachen.bpmn.rest.delegates.RestPublishJavaDelegate" activiti:extensionId="de.fh.aachen.bpmn.designer.RestPublishTask">
+    <serviceTask id="rest_benotung_task" name="Arbeit benoten" activiti:class="de.fh.aachen.bpmn.rest.delegates.RestPublishJavaDelegate" activiti:extensionId="de.fh.aachen.bpmn.designer.RestPublishTask">
       <extensionElements>
         <activiti:field name="assignee">
           <activiti:string>kermit</activiti:string>
@@ -15,24 +15,13 @@
           <activiti:string>{
 	"formProperties" : [
 		{
-			"id" : "foo",
-			"name" : "FOOOOOOOO",
-			"type" : "string",
+			"id" : "benotung_auswahl",
+			"name" : "Bestanden?",
+			"type" : "boolean",
 			"required" : true,
 			"readable" : true,
 			"writable" : true,
-			"variableName" : "var1",
-			"expression" : "",
-			"defaultExpression" : "Der Default Wert für foo."
-		},
-		{
-			"id" : "bar",
-			"name" : "BAAAAAAAAAAAAAR",
-			"type" : "string",
-			"required" : true,
-			"readable" : true,
-			"writable" : true,
-			"variableName" : "var2",
+			"variableName" : "bestanden",
 			"expression" : "",
 			"defaultExpression" : ""
 		}
@@ -41,30 +30,27 @@
         </activiti:field>
       </extensionElements>
     </serviceTask>
-    <sequenceFlow id="flow3" sourceRef="startevent1" targetRef="rest_task"></sequenceFlow>
+    <sequenceFlow id="flow3" sourceRef="startevent1" targetRef="rest_benotung_task"></sequenceFlow>
     <userTask id="usertask1" name="Wert testen" activiti:assignee="kermit">
       <extensionElements>
         <activiti:formProperty id="foo" name="Übernommener Wert" type="string" expression="${var1}" required="true"></activiti:formProperty>
       </extensionElements>
     </userTask>
-    <sequenceFlow id="flow4" sourceRef="rest_task" targetRef="usertask1"></sequenceFlow>
+    <sequenceFlow id="flow4" sourceRef="rest_benotung_task" targetRef="usertask1"></sequenceFlow>
     <sequenceFlow id="flow5" sourceRef="usertask1" targetRef="endevent1"></sequenceFlow>
   </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_rest_my_process">
-    <bpmndi:BPMNPlane bpmnElement="rest_my_process" id="BPMNPlane_rest_my_process">
+  <bpmndi:BPMNDiagram id="BPMNDiagram_rest_ma_anmeldung">
+    <bpmndi:BPMNPlane bpmnElement="rest_ma_anmeldung" id="BPMNPlane_rest_ma_anmeldung">
       <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
         <omgdc:Bounds height="35.0" width="35.0" x="220.0" y="270.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
         <omgdc:Bounds height="35.0" width="35.0" x="780.0" y="270.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="servicetask1" id="BPMNShape_servicetask1">
-        <omgdc:Bounds height="55.0" width="105.0" x="460.0" y="260.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="usertask1" id="BPMNShape_usertask1">
         <omgdc:Bounds height="55.0" width="105.0" x="650.0" y="200.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="rest_task" id="BPMNShape_rest_task">
+      <bpmndi:BPMNShape bpmnElement="rest_benotung_task" id="BPMNShape_rest_benotung_task">
         <omgdc:Bounds height="55.0" width="105.0" x="380.0" y="260.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">

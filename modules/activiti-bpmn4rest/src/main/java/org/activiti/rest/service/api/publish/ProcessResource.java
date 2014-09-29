@@ -98,7 +98,7 @@ public class ProcessResource extends SecuredResource {
 
     @Post
     public ProcessInstanceResponse createProcessInstance(ProcessInstanceCreateRequest request) {
-        if (!authenticate()) {
+        if (!authenticate() || request == null) {
             return null;
         }
         // check if the process name has the common B4R prefix
